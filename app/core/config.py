@@ -54,5 +54,9 @@ class Settings(BaseSettings):
         )
         return str(dsn)
 
+    # Google Analytics
+    GA4_MEASUREMENT_ID: str = "changethis"
+    GA4_API_SECRET: str = "changethis"
+
 
 settings = Settings()
