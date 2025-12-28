@@ -1,10 +1,10 @@
 from aiogram import Dispatcher
 
-from app.middlewares.analytics import AnalyticsMiddleware
-from app.middlewares.session import DatabaseMiddleware
+from app.middlewares.posthog import PostHogMiddleware
+from app.middlewares.session import SessionMakerMiddleware
 
 
 def get_middlewares(dp: Dispatcher) -> None:
-    dp.update.outer_middleware(DatabaseMiddleware())
+    dp.update.outer_middleware(SessionMakerMiddleware())
 
-    dp.update.middleware(AnalyticsMiddleware())
+    dp.update.middleware(PostHogMiddleware())

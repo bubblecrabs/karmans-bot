@@ -28,7 +28,7 @@ services:
       - postgres
       - redis
     environment:
-      BOT_TOKEN: ${BOT_TOKEN}
+      BOT_TOKEN: ${BOT_TOKEN:?BOT_TOKEN is required}
       DEBUG: ${DEBUG:-False}
       LOGGING_LEVEL: ${LOGGING_LEVEL:-20}
 
@@ -42,6 +42,9 @@ services:
       REDIS_PORT: 6379
       REDIS_DB: ${REDIS_DB:-0}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+      POSTHOG_API_TOKEN: ${POSTHOG_API_TOKEN:?POSTHOG_API_TOKEN is required}
+      POSTHOG_BASE_URL: ${POSTHOG_BASE_URL:-https://us.i.posthog.com}
     restart: always
 
 volumes:

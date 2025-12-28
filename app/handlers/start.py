@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
-from app.services.auth import AuthService
+from app.services.authorization import AuthService
 from app.utils.keyboards import start_kb
 from app.utils.messages import start_message
 

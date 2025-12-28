@@ -2,15 +2,15 @@
 
 help:
 	@echo "Available commands:"
-	@echo "  make build           - Build Docker images"
-	@echo "  make up              - Build and start containers"
-	@echo "  make down            - Stop containers"
-	@echo "  make down-v          - Stop containers and remove volumes"
-	@echo "  make migration       - Create new Alembic migration"
-	@echo "  make upgrade         - Apply migrations"
-	@echo "  make logs            - Show logs"
-	@echo "  make pre-commit      - Clean pre-commit cache"
-	@echo "  make pre-commit-all  - Run pre-commit on all files"
+	@echo "  make build            - Build Docker images"
+	@echo "  make up               - Build and start containers"
+	@echo "  make down             - Stop containers"
+	@echo "  make down-v           - Stop containers and remove volumes"
+	@echo "  make migration        - Create new Alembic migration"
+	@echo "  make upgrade          - Apply migrations"
+	@echo "  make logs             - Show logs"
+	@echo "  make pre-commit-clean - Clean pre-commit cache"
+	@echo "  make pre-commit-all   - Run pre-commit on all files"
 
 build:
 	docker compose build
@@ -33,7 +33,7 @@ upgrade:
 logs:
 	docker compose logs -f bot
 
-pre-commit:
+pre-commit-clean:
 	uv run pre-commit clean
 
 pre-commit-all:

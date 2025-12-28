@@ -28,6 +28,7 @@ repos:
           - aiogram
           - alembic
           - asyncpg
+          - httpx
           - pydantic
           - pydantic-settings
           - redis

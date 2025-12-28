@@ -5,6 +5,7 @@ from app.core.bot import bot, dp
 from app.core.config import settings
 from app.handlers import get_routers
 from app.middlewares import get_middlewares
+from app.services.posthog import PostHogService
 
 
 async def on_startup() -> None:
@@ -16,6 +17,9 @@ async def on_startup() -> None:
 
 
 async def on_shutdown() -> None:
+    # Close services
+    await PostHogService().close()
+
     # Close storages
     await dp.storage.close()
     await dp.fsm.storage.close()

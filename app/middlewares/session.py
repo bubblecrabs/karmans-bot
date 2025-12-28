@@ -7,7 +7,7 @@ from aiogram.types import TelegramObject
 from app.core.postgres import session_maker
 
 
-class DatabaseMiddleware(BaseMiddleware):
+class SessionMakerMiddleware(BaseMiddleware):
     """Middleware for injecting DB session into handlers"""
 
     async def __call__(

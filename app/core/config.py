@@ -33,7 +33,7 @@ class Settings(BaseSettings):
             password=self.POSTGRES_PASSWORD,
             path=self.POSTGRES_DB,
         )
-        return str(dsn)
+        return str(object=dsn)
 
     # Redis settings
     REDIS_USER: str | None = None
@@ -52,11 +52,11 @@ class Settings(BaseSettings):
             password=self.REDIS_PASSWORD,
             path=f"{self.REDIS_DB}",
         )
-        return str(dsn)
+        return str(object=dsn)
 
-    # Google Analytics
-    GA4_MEASUREMENT_ID: str = "changethis"
-    GA4_API_SECRET: str = "changethis"
+    # PostHog Analytics
+    POSTHOG_API_TOKEN: str = "changethis"
+    POSTHOG_BASE_URL: str = "https://us.i.posthog.com"
 
 
 settings = Settings()
