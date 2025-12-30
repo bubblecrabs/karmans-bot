@@ -17,6 +17,19 @@ class AuthService:
         last_name: str | None,
         is_premium: bool | None,
     ) -> User:
+        """
+        Authorize a user by creating or updating their record.
+
+        Args:
+            user_id: User ID
+            username: User's username (optional)
+            first_name: User's first name
+            last_name: User's last name (optional)
+            is_premium: Premium status flag (optional)
+
+        Returns:
+            User: Created or updated user object
+        """
         existing_user: User | None = await self.user_repository.get_user_by_user_id(user_id)
 
         if existing_user is None:

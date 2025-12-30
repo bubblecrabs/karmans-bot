@@ -9,8 +9,10 @@ class PostHogService:
     def __init__(self) -> None:
         self.api_key: str = settings.POSTHOG_API_TOKEN
         self.base_url: str = settings.POSTHOG_BASE_URL
-        self.headers: dict = {"Content-Type": "application/json"}
-        self.client = httpx.AsyncClient(timeout=10.0)
+        self.client = httpx.AsyncClient(
+            timeout=10.0,
+            headers={"Content-Type": "application/json"},
+        )
 
     async def track_event(
         self,
