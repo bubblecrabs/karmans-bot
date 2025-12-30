@@ -16,5 +16,5 @@ wheels/
 .ruff_cache/
 
 # Babel files
-.pot
-.mo
+*.pot
+*.mo
