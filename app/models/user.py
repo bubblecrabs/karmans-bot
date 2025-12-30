@@ -13,6 +13,7 @@ class User(Base):
     last_name: Mapped[str | None] = mapped_column(String(length=64), unique=False, nullable=True)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_premium: Mapped[bool | None] = mapped_column(Boolean, default=False, nullable=True)
+    language_code: Mapped[str | None] = mapped_column(String(length=10), unique=False, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

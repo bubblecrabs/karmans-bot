@@ -14,3 +14,7 @@ wheels/
 
 # Cache files
 .ruff_cache/
+
+# Babel files
+.pot
+.mo

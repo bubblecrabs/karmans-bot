@@ -4,13 +4,13 @@ import logging
 from app.core.bot import bot, dp
 from app.core.config import settings
 from app.handlers import get_routers
-from app.middlewares import get_middlewares
+from app.middlewares import setup_middlewares
 from app.services.posthog import PostHogService
 
 
 async def on_startup() -> None:
     # Register middlewares
-    get_middlewares(dp=dp)
+    setup_middlewares(dp=dp)
 
     # Register routers
     dp.include_routers(get_routers())

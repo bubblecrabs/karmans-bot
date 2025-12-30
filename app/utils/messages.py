@@ -1,5 +1,10 @@
+# Message keys - these will be translated at runtime using i18n
 # -------------------- Start --------------------
-start_message: str = "Hi"
+START_MESSAGE_KEY: str = "✋ Hi"
 
 # -------------------- Menu --------------------
-menu_message: str = "What do you want to do?"
+MENU_MESSAGE_KEY: str = "⬇️ What do you want to do?"
+
+# -------------------- Commands --------------------
+LANG_MESSAGE_KEY: str = "⬇️ Choose your language:"
+SET_LANG_MESSAGE_KEY: str = "✅ Your language has been successfully changed!"

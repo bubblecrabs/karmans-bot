@@ -1,8 +1,9 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
+from aiogram.utils.i18n import gettext as _
 
 from app.utils.keyboards import menu_kb
-from app.utils.messages import menu_message
+from app.utils.messages import MENU_MESSAGE_KEY
 
 router = Router()
 
@@ -14,7 +15,7 @@ async def start_callback_handler(call: CallbackQuery) -> None:
         return
 
     await call.message.edit_text(
-        text=menu_message,
+        text=_(MENU_MESSAGE_KEY),
         reply_markup=menu_kb(),
     )
     await call.answer()

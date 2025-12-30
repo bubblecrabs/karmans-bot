@@ -16,6 +16,7 @@ class AuthService:
         first_name: str,
         last_name: str | None,
         is_premium: bool | None,
+        language_code: str | None,
     ) -> User:
         """
         Authorize a user by creating or updating their record.
@@ -26,6 +27,7 @@ class AuthService:
             first_name: User's first name
             last_name: User's last name (optional)
             is_premium: Premium status flag (optional)
+            language_code: User's language (optional)
 
         Returns:
             User: Created or updated user object
@@ -40,6 +42,7 @@ class AuthService:
                 last_name=last_name,
                 is_premium=is_premium,
                 is_superuser=False,
+                language_code=language_code,
             )
         else:
             user: User = await self.user_repository.update_user(
@@ -48,6 +51,7 @@ class AuthService:
                 first_name=first_name,
                 last_name=last_name,
                 is_premium=is_premium,
+                language_code=language_code,
             )
 
         await self.session.commit()

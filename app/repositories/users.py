@@ -17,7 +17,8 @@ class UserRepository:
         first_name: str,
         last_name: str | None,
         is_premium: bool | None,
-        is_superuser: bool = False,
+        is_superuser: bool,
+        language_code: str | None,
     ) -> User:
         user = User(
             user_id=user_id,
@@ -26,6 +27,7 @@ class UserRepository:
             last_name=last_name,
             is_premium=is_premium,
             is_superuser=is_superuser,
+            language_code=language_code,
         )
         self.session.add(instance=user)
         await self.session.flush()
@@ -39,11 +41,13 @@ class UserRepository:
         first_name: str,
         last_name: str | None,
         is_premium: bool | None,
+        language_code: str | None,
     ) -> User:
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
         user.is_premium = is_premium
+        user.language_code = language_code
 
         await self.session.flush()
         await self.session.refresh(instance=user)
