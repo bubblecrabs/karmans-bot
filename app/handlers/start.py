@@ -1,7 +1,6 @@
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
 from aiogram.filters import CommandStart
-from aiogram.utils.i18n import gettext as _
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
@@ -29,7 +28,7 @@ async def start_command_handler(message: Message, session: AsyncSession) -> None
     )
 
     await message.answer(
-        text=_(START_MESSAGE_KEY),
+        text=START_MESSAGE_KEY,
         reply_markup=start_kb(is_superuser=user.is_superuser),
     )
 
@@ -52,7 +51,7 @@ async def start_callback_handler(call: CallbackQuery, session: AsyncSession) -> 
     )
 
     await call.message.edit_text(
-        text=_(START_MESSAGE_KEY),
+        text=START_MESSAGE_KEY,
         reply_markup=start_kb(is_superuser=user.is_superuser),
     )
     await call.answer()

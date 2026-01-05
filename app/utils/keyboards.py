@@ -1,63 +1,38 @@
-from collections.abc import Sequence
-
 from aiogram.utils.keyboard import InlineKeyboardBuilder, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils.i18n import gettext as _
-
-
-def create_inline_keyboard(
-    buttons: Sequence[tuple[str, str]],
-    adjust: int | Sequence[int] = 1,
-) -> InlineKeyboardMarkup:
-    """
-    Create inline keyboard from button definitions.
-
-    Args:
-        buttons: Sequence of (text, callback_data) tuples
-        adjust: Row width(s) for button layout
-
-    Returns:
-        InlineKeyboardMarkup ready to use
-    """
-    kb = InlineKeyboardBuilder()
-    for text, callback_data in buttons:
-        kb.add(InlineKeyboardButton(text=_(text), callback_data=callback_data))
-
-    if isinstance(adjust, int):
-        kb.adjust(adjust)
-    else:
-        kb.adjust(*adjust)
-
-    return kb.as_markup()
 
 
 def start_kb(is_superuser: bool) -> InlineKeyboardMarkup:
-    buttons: list[tuple[str, str]] = [
-        ("Button 1", "button_1"),
-        ("Button 2", "button_2"),
-    ]
-    if is_superuser:
-        buttons.append(("Button 3", "button_3"))
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="Button 1", callback_data="button_1"))
+    kb.add(InlineKeyboardButton(text="Button 2", callback_data="button_2"))
 
-    return create_inline_keyboard(buttons, adjust=2)
+    if is_superuser:
+        kb.add(InlineKeyboardButton(text="Button 3", callback_data="button_3"))
+
+    kb.adjust(2)
+    return kb.as_markup()
 
 
 def back_button_kb(callback_data: str) -> InlineKeyboardMarkup:
-    return create_inline_keyboard(buttons=[("⬅️ Back", callback_data)])
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data=callback_data))
+    kb.adjust(1)
+    return kb.as_markup()
 
 
 def menu_kb() -> InlineKeyboardMarkup:
-    buttons: list[tuple[str, str]] = [
-        ("Option 1", "option_1"),
-        ("Option 2", "option_2"),
-        ("⬅️ Back", "start"),
-    ]
-    return create_inline_keyboard(buttons, adjust=2)
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="Option 1", callback_data="option_1"))
+    kb.add(InlineKeyboardButton(text="Option 2", callback_data="option_2"))
+    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="start"))
+    kb.adjust(2)
+    return kb.as_markup()
 
 
 def lang_kb() -> InlineKeyboardMarkup:
-    buttons: list[tuple[str, str]] = [
-        ("🇷🇺 Russian", "lang_ru"),
-        ("🇺🇦 Ukrainian", "lang_uk"),
-        ("🇬🇧 English", "lang_en"),
-    ]
-    return create_inline_keyboard(buttons, adjust=2)
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="🇷🇺 Russian", callback_data="lang_ru"))
+    kb.add(InlineKeyboardButton(text="🇺🇦 Ukrainian", callback_data="lang_uk"))
+    kb.add(InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en"))
+    kb.adjust(2)
+    return kb.as_markup()

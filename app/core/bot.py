@@ -26,6 +26,6 @@ dp: Dispatcher = Dispatcher(storage=storage)
 
 i18n: I18n = I18n(
     path=LOCALES_DIR,
-    default_locale="en",
+    default_locale=settings.DEFAULT_LANGUAGE,
     domain="messages",
 )

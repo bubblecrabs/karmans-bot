@@ -2,10 +2,9 @@ import asyncio
 import logging
 
 from app.core.bot import bot, dp
-from app.core.config import settings
-from app.handlers import get_routers
+from app.handlers import setup_routers
 from app.middlewares import setup_middlewares
-from app.services.posthog import PostHogService
+from app.utils.commands import setup_commands, delete_commands
 
 
 async def on_startup() -> None:
@@ -13,12 +12,15 @@ async def on_startup() -> None:
     setup_middlewares(dp=dp)
 
     # Register routers
-    dp.include_routers(get_routers())
+    setup_routers(dp=dp)
+
+    # Register commands
+    await setup_commands(bot=bot)
 
 
 async def on_shutdown() -> None:
-    # Close services
-    await PostHogService().close()
+    # Delete commands
+    await delete_commands(bot=bot)
 
     # Close storages
     await dp.storage.close()
@@ -31,7 +33,7 @@ async def on_shutdown() -> None:
 
 async def main() -> None:
     logging.basicConfig(
-        level=settings.LOGGING_LEVEL,
+        level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )

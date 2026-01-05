@@ -1,5 +1,3 @@
-import logging
-
 from pydantic import PostgresDsn, RedisDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -14,7 +12,7 @@ class Settings(BaseSettings):
     # Bot settings
     BOT_TOKEN: str = "changethis"
     DEBUG: bool = False
-    LOGGING_LEVEL: int = logging.INFO
+    DEFAULT_LANGUAGE: str = "en"
 
     # Postgres settings
     POSTGRES_USER: str = "postgres"
@@ -53,10 +51,6 @@ class Settings(BaseSettings):
             path=f"{self.REDIS_DB}",
         )
         return str(object=dsn)
-
-    # PostHog Analytics
-    POSTHOG_API_TOKEN: str = "changethis"
-    POSTHOG_BASE_URL: str = "https://us.i.posthog.com"
 
 
 settings = Settings()
