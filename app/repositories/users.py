@@ -1,4 +1,5 @@
 from collections.abc import AsyncGenerator
+from datetime import datetime, date
 
 from sqlalchemy import select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +19,7 @@ class UserRepository:
         last_name: str | None,
         is_premium: bool | None,
         is_superuser: bool,
+        is_banned: bool,
         language_code: str | None,
     ) -> User:
         user = User(
@@ -27,6 +29,7 @@ class UserRepository:
             last_name=last_name,
             is_premium=is_premium,
             is_superuser=is_superuser,
+            is_banned=is_banned,
             language_code=language_code,
         )
         self.session.add(instance=user)
@@ -41,12 +44,14 @@ class UserRepository:
         first_name: str,
         last_name: str | None,
         is_premium: bool | None,
+        is_banned: bool,
         language_code: str | None,
     ) -> User:
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
         user.is_premium = is_premium
+        user.is_banned = is_banned
         user.language_code = language_code
 
         await self.session.flush()
@@ -78,7 +83,24 @@ class UserRepository:
         result = await self.session.execute(statement=stmt)
         return result.scalar_one()
 
+    async def count_users_joined_today(self) -> int:
+        today_start = datetime.combine(date=date.today(), time=datetime.min.time())
+        stmt = select(func.count(User.user_id)).where(User.created_at >= today_start)
+        result = await self.session.execute(statement=stmt)
+        return result.scalar_one()
+
+    async def count_banned_users(self) -> int:
+        stmt = select(func.count(User.user_id)).where(User.is_banned)
+        result = await self.session.execute(statement=stmt)
+        return result.scalar_one()
+
     async def get_last_joined_user(self) -> User | None:
         stmt = select(User).order_by(User.created_at.desc()).limit(limit=1)
         result = await self.session.execute(statement=stmt)
         return result.scalar_one_or_none()
+
+    async def is_user_banned(self, user_id: int) -> bool:
+        stmt = select(User.is_banned).where(User.user_id == user_id)
+        result = await self.session.execute(statement=stmt)
+        is_banned: bool | None = result.scalar_one_or_none()
+        return is_banned if is_banned is not None else False

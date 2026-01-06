@@ -13,10 +13,14 @@ class AdminService:
 
     async def statistics(self) -> dict:
         users_count: int = await self.user_repository.count_users()
+        new_users_today: int = await self.user_repository.count_users_joined_today()
+        banned_users_count: int = await self.user_repository.count_banned_users()
         last_user: User | None = await self.user_repository.get_last_joined_user()
 
         return {
             "total_users": users_count,
+            "new_users_today": new_users_today,
+            "banned_users": banned_users_count,
             "last_user": self._format_user(user=last_user),
             "joined_at": self._format_datetime(dt=last_user.created_at if last_user else None),
         }
@@ -30,3 +34,23 @@ class AdminService:
     @staticmethod
     def _format_datetime(dt: datetime | None) -> str:
         return dt.strftime(format="%d.%m.%Y %H:%M") if dt else "—"
+
+    async def block_user(self, user_id: int) -> bool:
+        user: User | None = await self.user_repository.get_user_by_user_id(user_id=user_id)
+        if not user:
+            return False
+
+        user.is_banned = True
+        await self.session.flush()
+        await self.session.commit()
+        return True
+
+    async def unblock_user(self, user_id: int) -> bool:
+        user: User | None = await self.user_repository.get_user_by_user_id(user_id=user_id)
+        if not user:
+            return False
+
+        user.is_banned = False
+        await self.session.flush()
+        await self.session.commit()
+        return True

@@ -44,9 +44,11 @@ class RedisCache:
         serialized: str = json.dumps(obj=value)
 
         if ttl:
-            return await self.redis.setex(name=key, value=serialized, time=ttl)
+            result = await self.redis.setex(name=key, time=ttl, value=serialized)
+            return result is not None
 
-        return await self.redis.set(name=key, value=serialized)
+        result = await self.redis.set(name=key, value=serialized)
+        return result is not None
 
     async def delete(self, *keys: str) -> int:
         """

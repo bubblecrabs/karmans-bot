@@ -27,6 +27,7 @@ class AuthService:
             first_name: User's first name
             last_name: User's last name (optional)
             is_premium: Premium status flag (optional)
+            is_banned: Banned status flag (optional)
             language_code: User's language (optional)
 
         Returns:
@@ -42,6 +43,7 @@ class AuthService:
                 last_name=last_name,
                 is_premium=is_premium,
                 is_superuser=False,
+                is_banned=False,
                 language_code=language_code,
             )
         else:
@@ -51,6 +53,7 @@ class AuthService:
                 first_name=first_name,
                 last_name=last_name,
                 is_premium=is_premium,
+                is_banned=existing_user.is_banned,
                 language_code=language_code,
             )
 

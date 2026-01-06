@@ -31,6 +31,7 @@ def upgrade() -> None:
         sa.Column("last_name", sa.String(length=64), nullable=True),
         sa.Column("is_superuser", sa.Boolean(), nullable=False),
         sa.Column("is_premium", sa.Boolean(), nullable=True),
+        sa.Column("is_banned", sa.Boolean(), nullable=False),
         sa.Column("language_code", sa.String(length=10), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=False),

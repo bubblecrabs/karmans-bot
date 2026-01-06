@@ -18,7 +18,7 @@ repos:
     rev: v0.13.0
     hooks:
       - id: ruff-check
-        args: [ "--fix", "--line-length=120" ]
+        args: [ "--fix", "--line-length=99" ]
 
   - repo: https://foundry.fsky.io/vel/ty-pre-commit
     rev: 0.0.3
