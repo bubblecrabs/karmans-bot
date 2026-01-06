@@ -1,6 +1,6 @@
 from collections.abc import AsyncGenerator
 
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
@@ -72,3 +72,13 @@ class UserRepository:
 
         async for user in stream:
             yield user
+
+    async def count_users(self) -> int:
+        stmt = select(func.count(User.user_id))
+        result = await self.session.execute(statement=stmt)
+        return result.scalar_one()
+
+    async def get_last_joined_user(self) -> User | None:
+        stmt = select(User).order_by(User.created_at.desc()).limit(limit=1)
+        result = await self.session.execute(statement=stmt)
+        return result.scalar_one_or_none()

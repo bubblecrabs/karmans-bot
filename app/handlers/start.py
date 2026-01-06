@@ -16,9 +16,7 @@ async def start_command_handler(message: Message, session: AsyncSession) -> None
     if not message.from_user:
         return
 
-    auth_service = AuthService(session)
-
-    user: User = await auth_service.authorization(
+    user: User = await AuthService(session).authorization(
         user_id=message.from_user.id,
         username=message.from_user.username,
         first_name=message.from_user.first_name,
@@ -39,9 +37,7 @@ async def start_callback_handler(call: CallbackQuery, session: AsyncSession) -> 
         await call.answer()
         return
 
-    auth_service = AuthService(session)
-
-    user: User = await auth_service.authorization(
+    user: User = await AuthService(session).authorization(
         user_id=call.from_user.id,
         username=call.from_user.username,
         first_name=call.from_user.first_name,

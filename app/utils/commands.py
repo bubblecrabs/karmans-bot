@@ -4,17 +4,14 @@ from aiogram.types import BotCommand, BotCommandScopeDefault
 user_commands: dict[str, dict[str, str]] = {
     "en": {
         "start": "Start the bot",
-        "lang": "Change language",
         "help": "Help & commands",
     },
     "ru": {
         "start": "Запустить бота",
-        "lang": "Сменить язык",
         "help": "Помощь и команды",
     },
     "uk": {
         "start": "Запустити бота",
-        "lang": "Змінити мову",
         "help": "Довідка і команди",
     },
 }

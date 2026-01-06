@@ -1,6 +1,9 @@
-START_MESSAGE_KEY: str = "✋ Hi"
+START_MESSAGE_KEY: str = "✋ <b>Hi</b>"
 
-MENU_MESSAGE_KEY: str = "⬇️ What do you want to do?"
+MENU_MESSAGE_KEY: str = "⬇️ <b>What do you want to do?</b>"
 
-LANG_MESSAGE_KEY: str = "⬇️ Choose your language:"
-SET_LANG_MESSAGE_KEY: str = "✅ Your language has been successfully changed!"
+STATS_MESSAGE_KEY: str = """📊 <b>Statistics:</b>
+
+👥 <b>Number of users:</b> {total_users}
+👤 <b>Last registered:</b> {last_user}
+🕒 <b>Registration time:</b> {joined_at}"""

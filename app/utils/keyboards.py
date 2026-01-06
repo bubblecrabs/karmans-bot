@@ -7,7 +7,7 @@ def start_kb(is_superuser: bool) -> InlineKeyboardMarkup:
     kb.add(InlineKeyboardButton(text="Button 2", callback_data="button_2"))
 
     if is_superuser:
-        kb.add(InlineKeyboardButton(text="Button 3", callback_data="button_3"))
+        kb.add(InlineKeyboardButton(text="Admin", callback_data="admin"))
 
     kb.adjust(2)
     return kb.as_markup()
@@ -29,10 +29,10 @@ def menu_kb() -> InlineKeyboardMarkup:
     return kb.as_markup()
 
 
-def lang_kb() -> InlineKeyboardMarkup:
+def admin_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.add(InlineKeyboardButton(text="🇷🇺 Russian", callback_data="lang_ru"))
-    kb.add(InlineKeyboardButton(text="🇺🇦 Ukrainian", callback_data="lang_uk"))
-    kb.add(InlineKeyboardButton(text="🇬🇧 English", callback_data="lang_en"))
+    kb.add(InlineKeyboardButton(text="Statistics", callback_data="stats"))
+    kb.add(InlineKeyboardButton(text="Mailing", callback_data="mailing"))
+    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="start"))
     kb.adjust(2)
     return kb.as_markup()
