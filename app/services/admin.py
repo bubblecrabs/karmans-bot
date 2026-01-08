@@ -8,8 +8,8 @@ from app.repositories.users import UserRepository
 
 class AdminService:
     def __init__(self, session: AsyncSession) -> None:
-        self.user_repository: UserRepository = UserRepository(session)
         self.session: AsyncSession = session
+        self.user_repository: UserRepository = UserRepository(session)
 
     async def statistics(self) -> dict:
         users_count: int = await self.user_repository.count_users()
@@ -33,7 +33,9 @@ class AdminService:
 
     @staticmethod
     def _format_datetime(dt: datetime | None) -> str:
-        return dt.strftime(format="%d.%m.%Y %H:%M") if dt else "—"
+        if not dt:
+            return "—"
+        return dt.strftime(format="%d.%m.%Y %H:%M")
 
     async def block_user(self, user_id: int) -> bool:
         user: User | None = await self.user_repository.get_user_by_user_id(user_id=user_id)

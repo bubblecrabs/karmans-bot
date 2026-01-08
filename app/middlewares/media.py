@@ -5,8 +5,11 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
 
-class CustomI18nMiddleware(BaseMiddleware):
-    """Middleware for internationalization (i18n) support"""
+class MediaGroupMiddleware(BaseMiddleware):
+    """Middleware for preventing duplicate processing of media group messages"""
+
+    def __init__(self):
+        self.processed_media_groups: set[str] = set[str]()
 
     async def __call__(
         self,
@@ -14,4 +17,5 @@ class CustomI18nMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> Any:
+        data["processed_media_groups"] = self.processed_media_groups
         return await handler(event, data)

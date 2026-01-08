@@ -3,23 +3,21 @@ services:
     image: postgres:17-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    env_file:
+      - .env
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     restart: always
-
   redis:
     image: redis:7-alpine
     volumes:
       - redis_data:/data
+    env_file:
+      - .env
     command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD}", "--port", "6379"]
     ports:
       - "${REDIS_PORT:-6379}:6379"
     restart: always
-
   bot:
     build:
       context: .
@@ -27,21 +25,8 @@ services:
     depends_on:
       - postgres
       - redis
-    environment:
-      BOT_TOKEN: ${BOT_TOKEN:?BOT_TOKEN is required}
-      DEBUG: ${DEBUG:-False}
-      DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-en}
-
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_DB: ${REDIS_DB:-0}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    env_file:
+      - .env
     restart: always
 
 volumes:

@@ -1,7 +1,7 @@
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Sequence
 from datetime import datetime, date
 
-from sqlalchemy import select, delete, func
+from sqlalchemy import select, delete, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
@@ -104,3 +104,13 @@ class UserRepository:
         result = await self.session.execute(statement=stmt)
         is_banned: bool | None = result.scalar_one_or_none()
         return is_banned if is_banned is not None else False
+
+    async def set_users_inactive(self, user_ids: list[int]) -> Sequence[int]:
+        stmt = (
+            update(table=User)
+            .where(User.user_id.in_(other=user_ids))
+            .values(is_active=False)
+            .returning(User.user_id)
+        )
+        result = await self.session.execute(statement=stmt)
+        return result.scalars().all()

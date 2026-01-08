@@ -6,9 +6,9 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.base import DefaultKeyBuilder
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.utils.i18n.core import I18n
+from redis.asyncio import Redis
 
 from app.core.config import settings
-from app.core.redis import redis_cache
 
 
 DIR: Path = Path(__file__).absolute().parent.parent.parent
@@ -21,8 +21,10 @@ bot: Bot = Bot(
     default=DefaultBotProperties(parse_mode=ParseMode.HTML),
 )
 
+redis: Redis = Redis.from_url(url=settings.REDIS_DSN)
+
 storage: RedisStorage = RedisStorage(
-    redis=redis_cache.redis,
+    redis=redis,
     key_builder=DefaultKeyBuilder(prefix="fsm:"),
 )
 

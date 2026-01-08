@@ -2,7 +2,6 @@ import asyncio
 import logging
 
 from app.core.bot import bot, dp
-from app.core.redis import redis_cache
 from app.handlers import setup_routers
 from app.middlewares import setup_middlewares
 from app.utils.commands import setup_commands, delete_commands
@@ -26,7 +25,6 @@ async def on_shutdown() -> None:
     # Close storages
     await dp.storage.close()
     await dp.fsm.storage.close()
-    await redis_cache.close()
 
     # Delete session and webhook
     await bot.delete_webhook()

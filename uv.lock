@@ -439,6 +439,41 @@ wheels = [
 ]
 
 [[package]]
+name = "karmans"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "aiogram", extra = ["i18n"] },
+    { name = "alembic" },
+    { name = "asyncpg" },
+    { name = "httpx", extra = ["http2"] },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+    { name = "redis" },
+    { name = "sqlalchemy", extra = ["asyncio"] },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pre-commit" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "aiogram", extras = ["i18n"], specifier = ">=3.23.0" },
+    { name = "alembic", specifier = ">=1.17.2" },
+    { name = "asyncpg", specifier = ">=0.31.0" },
+    { name = "httpx", extras = ["http2"], specifier = ">=0.28.1" },
+    { name = "pydantic", specifier = ">=2.12.5" },
+    { name = "pydantic-settings", specifier = ">=2.12.0" },
+    { name = "redis", specifier = ">=7.1.0" },
+    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.45" },
+]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pre-commit", specifier = ">=4.5.1" }]
+
+[[package]]
 name = "magic-filter"
 version = "1.0.12"
 source = { registry = "https://pypi.org/simple" }
@@ -830,41 +865,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/43/c8/983d5c6579a411d8a
 wheels = [
     { url = "https://files.pythonhosted.org/packages/89/f0/8956f8a86b20d7bb9d6ac0187cf4cd54d8065bc9a1a09eb8011d4d326596/redis-7.1.0-py3-none-any.whl", hash = "sha256:23c52b208f92b56103e17c5d06bdc1a6c2c0b3106583985a76a18f83b265de2b", size = 354159, upload-time = "2025-11-19T15:54:38.064Z" },
 ]
-
-[[package]]
-name = "scally"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "aiogram", extra = ["i18n"] },
-    { name = "alembic" },
-    { name = "asyncpg" },
-    { name = "httpx", extra = ["http2"] },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
-    { name = "redis" },
-    { name = "sqlalchemy", extra = ["asyncio"] },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pre-commit" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "aiogram", extras = ["i18n"], specifier = ">=3.23.0" },
-    { name = "alembic", specifier = ">=1.17.2" },
-    { name = "asyncpg", specifier = ">=0.31.0" },
-    { name = "httpx", extras = ["http2"], specifier = ">=0.28.1" },
-    { name = "pydantic", specifier = ">=2.12.5" },
-    { name = "pydantic-settings", specifier = ">=2.12.0" },
-    { name = "redis", specifier = ">=7.1.0" },
-    { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.45" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pre-commit", specifier = ">=4.5.1" }]
 
 [[package]]
 name = "sqlalchemy"
