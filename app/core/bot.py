@@ -10,11 +10,9 @@ from redis.asyncio import Redis
 
 from app.core.config import settings
 
-
 DIR: Path = Path(__file__).absolute().parent.parent.parent
 APP_DIR: Path = Path(__file__).absolute().parent.parent
 LOCALES_DIR = f"{APP_DIR}/locales"
-
 
 bot: Bot = Bot(
     token=settings.BOT_TOKEN,

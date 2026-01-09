@@ -36,10 +36,11 @@ def menu_kb() -> InlineKeyboardMarkup:
 def admin_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="📊 Statistics", callback_data="stats"))
-    kb.add(InlineKeyboardButton(text="📨 Mailing", callback_data="mailing"))
+    kb.add(InlineKeyboardButton(text="📨 Create mailing", callback_data="create_mailing"))
+    kb.add(InlineKeyboardButton(text="📬 Manage mailings", callback_data="manage_mailings"))
     kb.add(InlineKeyboardButton(text="🔑 Moderation", callback_data="moderation"))
     kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="start"))
-    kb.adjust(2, 1, 1)
+    kb.adjust(1)
     return kb.as_markup()
 
 

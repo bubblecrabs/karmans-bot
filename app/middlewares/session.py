@@ -4,7 +4,7 @@ from typing import Any
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from app.core.postgres import session_maker
+from app.core.postgres import get_session
 
 
 class SessionMakerMiddleware(BaseMiddleware):
@@ -16,6 +16,6 @@ class SessionMakerMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict[str, Any],
     ) -> Any:
-        async with session_maker() as session:
+        async with get_session() as session:
             data["session"] = session
             return await handler(event, data)

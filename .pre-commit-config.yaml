@@ -28,6 +28,7 @@ repos:
           - aiogram[i18n]
           - alembic
           - asyncpg
+          - faststream[nats]
           - httpx
           - pydantic
           - pydantic-settings

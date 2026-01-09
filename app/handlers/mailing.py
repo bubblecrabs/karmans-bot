@@ -7,8 +7,11 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
 
+from app.core.bot import bot
 from app.filters.admin import AdminFilter
 from app.middlewares.media import MediaGroupMiddleware
+from app.schemas.mailing import MailingMessage
+from app.services.mailing import MailingService
 from app.utils.keyboards import mailing_kb, back_button_kb, edit_button_kb, mailing_confirm_kb
 from app.utils.states import MailingStates
 
@@ -16,7 +19,7 @@ router = Router()
 router.message.middleware(MediaGroupMiddleware())
 
 
-@router.callback_query(F.data == "mailing", AdminFilter())
+@router.callback_query(F.data == "create_mailing", AdminFilter())
 async def mailing_callback(call: CallbackQuery) -> None:
     if not isinstance(call.message, Message):
         await call.answer()
@@ -204,7 +207,7 @@ async def mailing_edit_schedule_callback(call: CallbackQuery, state: FSMContext)
             "📋 <b>Accepted formats:</b>\n"
             "📌 <code>07.01.2026 21:12</code>\n"
             "📌 <code>15.03.2026 09:30</code>\n\n"
-            "⏰ <b>Date and time should be in the future</b>"
+            "🌍 <b>Time must be specified in UTC timezone!</b>"
         ),
         reply_markup=back_button_kb(callback_data="mailing"),
     )
@@ -331,16 +334,47 @@ async def mailing_start_callback(call: CallbackQuery, state: FSMContext) -> None
         await call.answer(text="❌ Message text is required!", show_alert=True)
         return
 
-    # schedule: str | None = mailing_data.get("schedule")
-    #
-    # if schedule:
-    #     scheduled_time: datetime = datetime.strptime(schedule, "%d.%m.%Y %H:%M")
-    #     task = ""
-    # else:
-    #     task = ""
+    mailing_service = MailingService(bot=bot)
 
-    await call.message.edit_text(
-        text="✅ <b>Mailing started!</b>",
-        reply_markup=back_button_kb(callback_data="mailing"),
+    image: str | None = mailing_data.get("image")
+    button_text: str | None = mailing_data.get("button_text")
+    button_url: str | None = mailing_data.get("button_url")
+    schedule_str: str | None = mailing_data.get("schedule")
+
+    scheduled_time: datetime | None = None
+    if schedule_str:
+        try:
+            parsed_time: datetime = datetime.strptime(schedule_str, "%d.%m.%Y %H:%M")
+            scheduled_time = parsed_time
+        except ValueError:
+            await call.answer(text="❌ Invalid schedule format!", show_alert=True)
+            return
+
+    message = MailingMessage(
+        text=text,
+        image=image,
+        button_text=button_text,
+        button_url=button_url,
+        scheduled_time=scheduled_time,
     )
+
+    try:
+        if scheduled_time is not None:
+            await mailing_service.send_scheduled_mailing(message_data=message)
+            await call.message.edit_text(
+                text=f"✅ <b>Mailing scheduled for {scheduled_time.strftime(format='%d.%m.%Y at %H:%M')}!</b>",
+                reply_markup=back_button_kb(callback_data="mailing"),
+            )
+        else:
+            await mailing_service.send_immediate_mailing(message_data=message)
+            await call.message.edit_text(
+                text="✅ <b>Mailing started!</b>",
+                reply_markup=back_button_kb(callback_data="mailing"),
+            )
+    except Exception as e:
+        await call.message.edit_text(
+            text=f"❌ <b>Failed to start mailing:</b> {str(object=e)}",
+            reply_markup=back_button_kb(callback_data="mailing"),
+        )
+
     await call.answer()

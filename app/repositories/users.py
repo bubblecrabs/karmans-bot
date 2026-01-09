@@ -90,7 +90,7 @@ class UserRepository:
         return result.scalar_one()
 
     async def count_banned_users(self) -> int:
-        stmt = select(func.count(User.user_id)).where(User.is_banned)
+        stmt = select(func.count(User.user_id)).where(User.is_banned == True)  # noqa: E712
         result = await self.session.execute(statement=stmt)
         return result.scalar_one()
 
@@ -104,6 +104,11 @@ class UserRepository:
         result = await self.session.execute(statement=stmt)
         is_banned: bool | None = result.scalar_one_or_none()
         return is_banned if is_banned is not None else False
+
+    async def get_active_user_ids(self) -> Sequence[int]:
+        stmt = select(User.user_id).where(User.is_banned == False)  # noqa: E712
+        result = await self.session.execute(statement=stmt)
+        return result.scalars().all()
 
     async def set_users_inactive(self, user_ids: list[int]) -> Sequence[int]:
         stmt = (

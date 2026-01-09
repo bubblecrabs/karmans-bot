@@ -8,6 +8,7 @@ dependencies = [
     "aiogram[i18n]>=3.23.0",
     "alembic>=1.17.2",
     "asyncpg>=0.31.0",
+    "faststream[nats]>=0.6.5",
     "httpx[http2]>=0.28.1",
     "pydantic>=2.12.5",
     "pydantic-settings>=2.12.0",

@@ -1,70 +1,72 @@
-import asyncio
-import logging
+from collections.abc import Sequence
+from typing import Any
 
 from aiogram import Bot
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.exceptions import TelegramForbiddenError, TelegramBadRequest
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.repositories.users import UserRepository
-
-logger: logging.Logger = logging.getLogger(name=__name__)
+from app.core.nats import broker
+from app.schemas.mailing import MailingMessage
 
 
 class MailingService:
-    def __init__(self, session: AsyncSession, bot: Bot):
-        self.session: AsyncSession = session
-        self.repository = UserRepository(session)
+    """Service for handling mailing operations through NATS message queue"""
+
+    SUBJECT_IMMEDIATE = "mailing.immediate"
+    SUBJECT_SCHEDULED = "mailing.scheduled"
+
+    def __init__(self, bot: Bot) -> None:
         self.bot: Bot = bot
 
-    async def send_mailing(
+    async def send_immediate_mailing(self, message_data: MailingMessage) -> None:
+        await broker.publish(
+            message=message_data.model_dump(),
+            subject=self.SUBJECT_IMMEDIATE,
+        )
+
+    async def send_scheduled_mailing(self, message_data: MailingMessage) -> None:
+        if not message_data.scheduled_time:
+            raise ValueError("scheduled_time is required for scheduled mailing")
+
+        await broker.publish(
+            message=message_data.model_dump(),
+            subject=self.SUBJECT_SCHEDULED,
+        )
+
+    async def process_mailing(
         self,
-        text: str,
-        image: str | None = None,
-        button_text: str | None = None,
-        button_url: str | None = None,
+        message_data: dict[str, Any],
+        user_ids: Sequence[int],
     ) -> dict[str, int]:
-        stats: dict[str, int] = {
-            "total": 0,
-            "success": 0,
-            "blocked": 0,
-            "failed": 0,
-        }
+        text: str = message_data["text"]
+        image: str | None = message_data.get("image")
+        button_text: str | None = message_data.get("button_text")
+        button_url: str | None = message_data.get("button_url")
 
-        reply_markup: InlineKeyboardMarkup | None = self._build_keyboard(button_text, button_url)
+        reply_markup: InlineKeyboardMarkup | None = self._build_keyboard(
+            button_text=button_text,
+            button_url=button_url,
+        )
 
-        blocked_user_ids: list[int] = []
+        success_count = 0
+        failed_count = 0
 
-        async for user in self.repository.get_users():
-            if not user:
-                continue
-
-            stats["total"] += 1
-
+        for user_id in user_ids:
             try:
                 await self._send_to_user(
-                    user_id=user.user_id,
+                    user_id=user_id,
                     text=text,
                     image=image,
                     reply_markup=reply_markup,
                 )
-                stats["success"] += 1
+                success_count += 1
+            except Exception:
+                failed_count += 1
+                continue
 
-            except TelegramForbiddenError:
-                stats["blocked"] += 1
-                blocked_user_ids.append(user.user_id)
-
-            except (TelegramBadRequest, Exception) as e:
-                stats["failed"] += 1
-                logger.error(msg=f"Error sending to {user.user_id}: {e}")
-
-            await asyncio.sleep(delay=0.05)
-
-        if blocked_user_ids:
-            await self.repository.set_users_inactive(blocked_user_ids)
-            await self.session.commit()
-
-        return stats
+        return {
+            "success": success_count,
+            "failed": failed_count,
+        }
 
     async def _send_to_user(
         self,

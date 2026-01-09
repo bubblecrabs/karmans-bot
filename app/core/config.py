@@ -1,4 +1,4 @@
-from pydantic import PostgresDsn, RedisDsn
+from pydantic import PostgresDsn, RedisDsn, NatsDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -49,6 +49,23 @@ class Settings(BaseSettings):
             username=self.REDIS_USER,
             password=self.REDIS_PASSWORD,
             path=f"{self.REDIS_DB}",
+        )
+        return str(object=dsn)
+
+    # Nats settings
+    NATS_USER: str | None = None
+    NATS_PASSWORD: str | None = None
+    NATS_HOST: str = "nats"
+    NATS_PORT: int = 4222
+
+    @property
+    def NATS_DSN(self) -> str:
+        dsn: NatsDsn = NatsDsn.build(
+            scheme="nats",
+            host=self.NATS_HOST,
+            port=self.NATS_PORT,
+            username=self.NATS_USER,
+            password=self.NATS_PASSWORD,
         )
         return str(object=dsn)
 

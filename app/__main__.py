@@ -2,12 +2,16 @@ import asyncio
 import logging
 
 from app.core.bot import bot, dp
+from app.core.nats import start_broker, stop_broker
 from app.handlers import setup_routers
 from app.middlewares import setup_middlewares
 from app.utils.commands import setup_commands, delete_commands
 
 
 async def on_startup() -> None:
+    # Start NATS broker
+    await start_broker()
+
     # Register middlewares
     setup_middlewares(dp=dp)
 
@@ -19,6 +23,9 @@ async def on_startup() -> None:
 
 
 async def on_shutdown() -> None:
+    # Stop NATS broker
+    await stop_broker()
+
     # Delete commands
     await delete_commands(bot=bot)
 
