@@ -12,3 +12,8 @@ class MailingStates(StatesGroup):
     edit_button_text: State = State()
     edit_button_url: State = State()
     edit_schedule: State = State()
+
+
+class ManageMailingsStates(StatesGroup):
+    update_mailing_id: State = State()
+    delete_mailing_id: State = State()

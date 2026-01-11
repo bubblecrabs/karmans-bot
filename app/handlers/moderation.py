@@ -13,12 +13,10 @@ router = Router()
 
 
 @router.callback_query(F.data == "moderation", AdminFilter())
-async def moderation_callback(call: CallbackQuery, state: FSMContext) -> None:
+async def moderation_callback(call: CallbackQuery) -> None:
     if not isinstance(call.message, Message):
         await call.answer()
         return
-
-    await state.clear()
 
     await call.message.edit_text(
         text="⬇️ <b>What do you want to do?</b>",

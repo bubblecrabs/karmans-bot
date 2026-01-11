@@ -1,19 +1,26 @@
 import re
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import Any
 
 from aiogram import F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup
 
 from app.core.bot import bot
 from app.filters.admin import AdminFilter
 from app.middlewares.media import MediaGroupMiddleware
 from app.schemas.mailing import MailingMessage
 from app.services.mailing import MailingService
-from app.utils.keyboards import mailing_kb, back_button_kb, edit_button_kb, mailing_confirm_kb
-from app.utils.states import MailingStates
+from app.utils.keyboards import (
+    back_button_kb,
+    url_button_kb,
+    mailing_kb,
+    mailing_edit_button_kb,
+    mailing_confirm_kb,
+    manage_mailings_kb,
+)
+from app.utils.states import MailingStates, ManageMailingsStates
 
 router = Router()
 router.message.middleware(MediaGroupMiddleware())
@@ -40,7 +47,7 @@ async def mailing_edit_text_callback(call: CallbackQuery, state: FSMContext) -> 
 
     await call.message.edit_text(
         text="✍️ <b>Send the message text for the mailing:</b>",
-        reply_markup=back_button_kb(callback_data="mailing"),
+        reply_markup=back_button_kb(callback_data="create_mailing"),
     )
     await state.set_state(state=MailingStates.edit_text)
     await call.answer()
@@ -59,7 +66,7 @@ async def mailing_text_received_message(message: Message, state: FSMContext) -> 
     await state.update_data(text=message.text)
     await message.answer(
         text="✅ <b>Text saved!</b>",
-        reply_markup=back_button_kb(callback_data="mailing"),
+        reply_markup=back_button_kb(callback_data="create_mailing"),
     )
 
 
@@ -71,7 +78,7 @@ async def mailing_edit_media_callback(call: CallbackQuery, state: FSMContext) ->
 
     await call.message.edit_text(
         text=("🖼️ <b>Send image for the mailing:</b>"),
-        reply_markup=back_button_kb(callback_data="mailing"),
+        reply_markup=back_button_kb(callback_data="create_mailing"),
     )
     await state.set_state(state=MailingStates.edit_media)
     await call.answer()
@@ -99,7 +106,7 @@ async def mailing_media_received_message(
     await state.update_data(image=photo_id)
     await message.answer(
         text="✅ <b>Image saved!</b>",
-        reply_markup=back_button_kb(callback_data="mailing"),
+        reply_markup=back_button_kb(callback_data="create_mailing"),
     )
 
 
@@ -111,7 +118,7 @@ async def mailing_edit_button_callback(call: CallbackQuery) -> None:
 
     await call.message.edit_text(
         text="⬇️ <b>What do you want to do?</b>",
-        reply_markup=edit_button_kb(),
+        reply_markup=mailing_edit_button_kb(),
     )
     await call.answer()
 
@@ -201,15 +208,17 @@ async def mailing_edit_schedule_callback(call: CallbackQuery, state: FSMContext)
         await call.answer()
         return
 
+    now: datetime = datetime.now(tz=UTC)
+    example_datetime: str = now.strftime(format="%d.%m.%Y %H:%M")
+
     await call.message.edit_text(
         text=(
             "🗓️ <b>Send the schedule date for the mailing:</b>\n\n"
             "📋 <b>Accepted formats:</b>\n"
-            "📌 <code>07.01.2026 21:12</code>\n"
-            "📌 <code>15.03.2026 09:30</code>\n\n"
+            f"📌 <code>{example_datetime}</code>\n\n"
             "🌍 <b>Time must be specified in UTC timezone!</b>"
         ),
-        reply_markup=back_button_kb(callback_data="mailing"),
+        reply_markup=back_button_kb(callback_data="create_mailing"),
     )
     await state.set_state(state=MailingStates.edit_schedule)
     await call.answer()
@@ -243,7 +252,7 @@ async def mailing_edit_schedule_message(message: Message, state: FSMContext) -> 
     await state.update_data(schedule=date_str)
     await message.answer(
         text="✅ <b>Schedule date saved!</b>",
-        reply_markup=back_button_kb(callback_data="mailing"),
+        reply_markup=back_button_kb(callback_data="create_mailing"),
     )
 
 
@@ -265,11 +274,10 @@ async def mailing_preview_callback(call: CallbackQuery, state: FSMContext) -> No
         await call.answer(text="❌ Message text is required!", show_alert=True)
         return
 
-    reply_markup = None
-    if button_text and button_url:
-        reply_markup: InlineKeyboardMarkup = InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(text=button_text, url=button_url)]]
-        )
+    reply_markup: InlineKeyboardMarkup | None = url_button_kb(
+        text=button_text,
+        url=button_url,
+    )
 
     schedule_info = ""
     if schedule:
@@ -363,18 +371,60 @@ async def mailing_start_callback(call: CallbackQuery, state: FSMContext) -> None
             await mailing_service.send_scheduled_mailing(message_data=message)
             await call.message.edit_text(
                 text=f"✅ <b>Mailing scheduled for {scheduled_time.strftime(format='%d.%m.%Y at %H:%M')}!</b>",
-                reply_markup=back_button_kb(callback_data="mailing"),
+                reply_markup=back_button_kb(callback_data="create_mailing"),
             )
         else:
             await mailing_service.send_immediate_mailing(message_data=message)
             await call.message.edit_text(
                 text="✅ <b>Mailing started!</b>",
-                reply_markup=back_button_kb(callback_data="mailing"),
+                reply_markup=back_button_kb(callback_data="create_mailing"),
             )
     except Exception as e:
         await call.message.edit_text(
             text=f"❌ <b>Failed to start mailing:</b> {str(object=e)}",
-            reply_markup=back_button_kb(callback_data="mailing"),
+            reply_markup=back_button_kb(callback_data="create_mailing"),
         )
 
+    await state.clear()
+    await call.answer()
+
+
+@router.callback_query(F.data == "manage_mailings", AdminFilter())
+async def manage_mailings_callback(call: CallbackQuery) -> None:
+    if not isinstance(call.message, Message):
+        await call.answer()
+        return
+
+    await call.message.edit_text(
+        text="⬇️ <b>What do you want to do?</b>",
+        reply_markup=manage_mailings_kb(),
+    )
+    await call.answer()
+
+
+@router.callback_query(F.data == "update_mailing", AdminFilter())
+async def update_mailing_callback(call: CallbackQuery, state: FSMContext) -> None:
+    if not isinstance(call.message, Message):
+        await call.answer()
+        return
+
+    await call.message.edit_text(
+        text="✍️ <b>Send mailing ID to update mailing:</b>",
+        reply_markup=back_button_kb(callback_data="manage_mailings"),
+    )
+    await state.set_state(state=ManageMailingsStates.update_mailing_id)
+    await call.answer()
+
+
+@router.callback_query(F.data == "delete_mailing", AdminFilter())
+async def delete_mailing_callback(call: CallbackQuery, state: FSMContext) -> None:
+    if not isinstance(call.message, Message):
+        await call.answer()
+        return
+
+    await call.message.edit_text(
+        text="✍️ <b>Send mailing ID to delete mailing:</b>",
+        reply_markup=back_button_kb(callback_data="manage_mailings"),
+    )
+    await state.set_state(state=ManageMailingsStates.delete_mailing_id)
     await call.answer()

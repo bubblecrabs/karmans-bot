@@ -24,6 +24,16 @@ def back_button_kb(callback_data: str) -> InlineKeyboardMarkup:
     return kb.as_markup()
 
 
+def url_button_kb(text: str | None, url: str | None) -> InlineKeyboardMarkup | None:
+    if text is None or url is None:
+        return None
+
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text=text, url=url))
+    kb.adjust(1)
+    return kb.as_markup()
+
+
 def menu_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="Option 1", callback_data="option_1"))
@@ -37,7 +47,7 @@ def admin_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="📊 Statistics", callback_data="stats"))
     kb.add(InlineKeyboardButton(text="📨 Create mailing", callback_data="create_mailing"))
-    kb.add(InlineKeyboardButton(text="📬 Manage mailings", callback_data="manage_mailings"))
+    kb.add(InlineKeyboardButton(text="📬 Scheduled mailings", callback_data="manage_mailings"))
     kb.add(InlineKeyboardButton(text="🔑 Moderation", callback_data="moderation"))
     kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="start"))
     kb.adjust(1)
@@ -67,11 +77,11 @@ def mailing_kb() -> InlineKeyboardMarkup:
     return kb.as_markup()
 
 
-def edit_button_kb() -> InlineKeyboardMarkup:
+def mailing_edit_button_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="📝 Button Text", callback_data="mailing_edit_button_text"))
     kb.add(InlineKeyboardButton(text="🔗 Button URL", callback_data="mailing_edit_button_url"))
-    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="mailing"))
+    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="create_mailing"))
     kb.adjust(2)
     return kb.as_markup()
 
@@ -79,6 +89,16 @@ def edit_button_kb() -> InlineKeyboardMarkup:
 def mailing_confirm_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="Yes", callback_data="mailing_start"))
-    kb.add(InlineKeyboardButton(text="No", callback_data="mailing"))
+    kb.add(InlineKeyboardButton(text="No", callback_data="create_mailing"))
     kb.adjust(2)
+    return kb.as_markup()
+
+
+def manage_mailings_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="📋 View Mailings", callback_data="view_mailings"))
+    kb.add(InlineKeyboardButton(text="✏️ Update Mailing", callback_data="update_mailing"))
+    kb.add(InlineKeyboardButton(text="🗑️ Delete Mailing", callback_data="delete_mailing"))
+    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="admin"))
+    kb.adjust(1)
     return kb.as_markup()

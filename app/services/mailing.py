@@ -2,10 +2,11 @@ from collections.abc import Sequence
 from typing import Any
 
 from aiogram import Bot
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardMarkup
 
 from app.core.nats import broker
 from app.schemas.mailing import MailingMessage
+from app.utils.keyboards import url_button_kb
 
 
 class MailingService:
@@ -42,9 +43,9 @@ class MailingService:
         button_text: str | None = message_data.get("button_text")
         button_url: str | None = message_data.get("button_url")
 
-        reply_markup: InlineKeyboardMarkup | None = self._build_keyboard(
-            button_text=button_text,
-            button_url=button_url,
+        reply_markup: InlineKeyboardMarkup | None = url_button_kb(
+            text=button_text,
+            url=button_url,
         )
 
         success_count = 0
@@ -88,14 +89,3 @@ class MailingService:
                 text=text,
                 reply_markup=reply_markup,
             )
-
-    @staticmethod
-    def _build_keyboard(
-        button_text: str | None,
-        button_url: str | None,
-    ) -> InlineKeyboardMarkup | None:
-        if button_text and button_url:
-            return InlineKeyboardMarkup(
-                inline_keyboard=[[InlineKeyboardButton(text=button_text, url=button_url)]]
-            )
-        return None

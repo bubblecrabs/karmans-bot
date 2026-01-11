@@ -2,6 +2,7 @@ import asyncio
 import logging
 
 from app.core.bot import bot, dp
+from app.core.faststream import app
 from app.core.nats import start_broker, stop_broker
 from app.handlers import setup_routers
 from app.middlewares import setup_middlewares
@@ -48,7 +49,12 @@ async def main() -> None:
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
-    await dp.start_polling(bot)
+    try:
+        async with asyncio.TaskGroup() as tg:
+            tg.create_task(coro=dp.start_polling(bot))
+            tg.create_task(coro=app.run())
+    finally:
+        await app.stop()
 
 
 if __name__ == "__main__":

@@ -5,26 +5,25 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import Any
 
+from faststream.nats import NatsRouter
+
 from app.core.bot import bot
 from app.core.postgres import get_session
-from app.core.nats import broker
 from app.repositories.users import UserRepository
 from app.services.mailing import MailingService
 
 logger: logging.Logger = logging.getLogger(name=__name__)
 
+router = NatsRouter()
 
-@broker.subscriber(subject="mailing.immediate")
+
+@router.subscriber(subject="mailing.immediate")
 async def handle_immediate_mailing(message_data: dict[str, Any]) -> None:
-    logger.info(msg="Processing immediate mailing")
-
     mailing_service = MailingService(bot=bot)
 
     async with get_session() as session:
         user_repo = UserRepository(session=session)
         user_ids: Sequence[int] = await user_repo.get_active_user_ids()
-
-    logger.info(msg=f"Found {len(user_ids)} users for mailing")
 
     result: dict[str, int] = await mailing_service.process_mailing(
         message_data=message_data,
@@ -34,7 +33,7 @@ async def handle_immediate_mailing(message_data: dict[str, Any]) -> None:
     logger.info(msg=f"Mailing completed: {result['success']} success, {result['failed']} failed")
 
 
-@broker.subscriber(subject="mailing.scheduled")
+@router.subscriber(subject="mailing.scheduled")
 async def handle_scheduled_mailing(message_data: dict[str, Any]) -> None:
     scheduled_time_str: str | None = message_data.get("scheduled_time")
 
@@ -52,15 +51,11 @@ async def handle_scheduled_mailing(message_data: dict[str, Any]) -> None:
         logger.info(msg=f"Waiting {delay} seconds until scheduled time")
         await asyncio.sleep(delay)
 
-    logger.info(msg="Processing scheduled mailing")
-
     mailing_service = MailingService(bot=bot)
 
     async with get_session() as session:
         user_repo = UserRepository(session=session)
         user_ids: Sequence[int] = await user_repo.get_active_user_ids()
-
-    logger.info(msg=f"Found {len(user_ids)} users for scheduled mailing")
 
     result: dict[str, int] = await mailing_service.process_mailing(
         message_data=message_data,
