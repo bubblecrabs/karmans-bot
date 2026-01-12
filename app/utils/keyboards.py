@@ -38,7 +38,8 @@ def url_button_kb(text: str | None, url: str | None) -> InlineKeyboardMarkup | N
 
 def admin_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.add(InlineKeyboardButton(text="📊 Statistics", callback_data="stats"))
+    kb.add(InlineKeyboardButton(text="👥 Users", callback_data="user_stats"))
+    kb.add(InlineKeyboardButton(text="💵 Payments", callback_data="payment_stats"))
     kb.add(InlineKeyboardButton(text="📨 Create Mailing", callback_data="create_mailing"))
     kb.add(InlineKeyboardButton(text="📬 Scheduled Mailings", callback_data="manage_mailings"))
     kb.add(InlineKeyboardButton(text="🔑 Moderation", callback_data="moderation"))

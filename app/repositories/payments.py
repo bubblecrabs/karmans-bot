@@ -82,31 +82,38 @@ class PaymentRepository:
         result = await self.session.execute(statement=stmt)
         return result.scalars().all()
 
-    async def get_payment_stats(
-        self,
-        currency: PaymentCurrency = PaymentCurrency.USD,
-    ) -> dict[str, int | Decimal]:
+    async def get_payment_stats(self) -> dict[str, int | Decimal]:
         today_start: datetime = datetime.combine(date=date.today(), time=datetime.min.time())
 
         count_stmt = select(
             func.count(Payment.id).label("total"),
             func.count(case((Payment.created_at >= today_start, 1))).label("today"),
-        ).where(Payment.currency == currency)
+        )
 
         count_result = await self.session.execute(statement=count_stmt)
         counts = count_result.one()
 
-        revenue_stmt = select(
+        revenue_xtr_stmt = select(
             func.sum(Payment.amount).label("total"),
             func.sum(case((Payment.created_at >= today_start, Payment.amount))).label("today"),
-        ).where(Payment.currency == currency, Payment.status == PaymentStatus.PAID)
+        ).where(Payment.currency == PaymentCurrency.XTR, Payment.status == PaymentStatus.PAID)
 
-        revenue_result = await self.session.execute(statement=revenue_stmt)
-        revenue = revenue_result.one()
+        revenue_xtr_result = await self.session.execute(statement=revenue_xtr_stmt)
+        revenue_xtr = revenue_xtr_result.one()
+
+        revenue_usd_stmt = select(
+            func.sum(Payment.amount).label("total"),
+            func.sum(case((Payment.created_at >= today_start, Payment.amount))).label("today"),
+        ).where(Payment.currency == PaymentCurrency.USD, Payment.status == PaymentStatus.PAID)
+
+        revenue_usd_result = await self.session.execute(statement=revenue_usd_stmt)
+        revenue_usd = revenue_usd_result.one()
 
         return {
             "total_payments": counts.total,
             "payments_today": counts.today,
-            "total_revenue": Decimal(value=str(object=revenue.total or 0)),
-            "revenue_today": Decimal(value=str(object=revenue.today or 0)),
+            "total_revenue_xtr": Decimal(value=str(object=revenue_xtr.total or 0)),
+            "revenue_today_xtr": Decimal(value=str(object=revenue_xtr.today or 0)),
+            "total_revenue_usd": Decimal(value=str(object=revenue_usd.total or 0)),
+            "revenue_today_usd": Decimal(value=str(object=revenue_usd.today or 0)),
         }

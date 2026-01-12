@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from decimal import Decimal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,15 +12,6 @@ class AdminService:
         self.session: AsyncSession = session
         self.user_repo: UserRepository = UserRepository(session)
         self.payment_repo: PaymentRepository = PaymentRepository(session)
-
-    async def statistics(self) -> dict:
-        user_stats: dict[str, int] = await self.user_repo.get_user_stats()
-        payment_stats: dict[str, int | Decimal] = await self.payment_repo.get_payment_stats()
-
-        return {
-            **user_stats,
-            **payment_stats,
-        }
 
     async def block_user(self, user_id: int) -> bool:
         user: User | None = await self.user_repo.get_user_by_user_id(user_id=user_id)
