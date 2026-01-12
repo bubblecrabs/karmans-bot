@@ -10,7 +10,7 @@ from app.filters.admin import AdminFilter
 from app.models.user import User
 from app.repositories.users import UserRepository
 from app.services.admin import AdminService
-from app.utils.keyboards import moderation_kb, moderation_premium_tier_kb, back_button_kb
+from app.utils.keyboards import moderation_kb, premium_tier_kb, back_button_kb
 from app.utils.states import AdminStates
 
 router = Router()
@@ -159,7 +159,7 @@ async def moderation_add_premium_message(
 
     await message.answer(
         text="📋 <b>Select a premium subscription type:</b>",
-        reply_markup=moderation_premium_tier_kb(),
+        reply_markup=premium_tier_kb(callback_back="moderation"),
     )
 
 

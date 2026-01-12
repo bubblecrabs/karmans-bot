@@ -27,6 +27,7 @@ class PaymentStatus(str, PyEnum):
 
 class PaymentProvider(str, PyEnum):
     TELEGRAM_STARS = "telegram_stars"
+    CRYPTO = "crypto"
 
 
 class Payment(Base):
@@ -45,19 +46,19 @@ class Payment(Base):
         Numeric[Decimal](precision=10, scale=2),
         nullable=False,
     )
-    currency: Mapped[str] = mapped_column(
-        Enum(enums=PaymentCurrency, native_enum=False, length=3),
+    currency: Mapped[PaymentCurrency] = mapped_column(
+        Enum(PaymentCurrency, native_enum=False, length=3),
         nullable=False,
         default=PaymentCurrency.USD,
     )
     status: Mapped[PaymentStatus] = mapped_column(
-        Enum(enums=PaymentStatus, native_enum=False, length=20),
+        Enum(PaymentStatus, native_enum=False, length=20),
         nullable=False,
         default=PaymentStatus.PENDING,
         index=True,
     )
     provider: Mapped[PaymentProvider] = mapped_column(
-        Enum(enums=PaymentProvider, native_enum=False, length=30),
+        Enum(PaymentProvider, native_enum=False, length=30),
         nullable=False,
     )
     description: Mapped[str | None] = mapped_column(
@@ -68,10 +69,6 @@ class Payment(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
-    )
-    paid_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
     )
 
     # Relationship

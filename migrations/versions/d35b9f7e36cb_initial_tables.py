@@ -1,8 +1,8 @@
 """Initial tables
 
-Revision ID: 4ac00f079ac0
+Revision ID: d35b9f7e36cb
 Revises:
-Create Date: 2026-01-12 13:08:19.422930
+Create Date: 2026-01-12 19:56:16.953094
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "4ac00f079ac0"
+revision: str = "d35b9f7e36cb"
 down_revision: str | Sequence[str] | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
@@ -58,9 +58,42 @@ def upgrade() -> None:
         sa.Column("user_id", sa.BigInteger(), nullable=False),
         sa.Column("charge_id", sa.String(length=255), nullable=True),
         sa.Column("amount", sa.Numeric(precision=10, scale=2), nullable=False),
-        sa.Column("currency", sa.Enum(native_enum=False, length=3), nullable=False),
-        sa.Column("status", sa.Enum(native_enum=False, length=20), nullable=False),
-        sa.Column("provider", sa.Enum(native_enum=False, length=30), nullable=False),
+        sa.Column(
+            "currency",
+            sa.Enum(
+                "USD",
+                "XTR",
+                name="paymentcurrency",
+                native_enum=False,
+                length=3,
+            ),
+            nullable=False,
+        ),
+        sa.Column(
+            "status",
+            sa.Enum(
+                "PENDING",
+                "PAID",
+                "FAILED",
+                "REFUNDED",
+                "CANCELED",
+                name="paymentstatus",
+                native_enum=False,
+                length=20,
+            ),
+            nullable=False,
+        ),
+        sa.Column(
+            "provider",
+            sa.Enum(
+                "TELEGRAM_STARS",
+                "CRYPTO",
+                name="paymentprovider",
+                native_enum=False,
+                length=30,
+            ),
+            nullable=False,
+        ),
         sa.Column("description", sa.String(length=500), nullable=True),
         sa.Column(
             "created_at",
@@ -68,7 +101,6 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.Column("paid_at", sa.DateTime(timezone=True), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.user_id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("charge_id"),
