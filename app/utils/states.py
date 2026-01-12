@@ -4,6 +4,8 @@ from aiogram.fsm.state import State, StatesGroup
 class AdminStates(StatesGroup):
     ban_user_id: State = State()
     unban_user_id: State = State()
+    add_premium_user_id: State = State()
+    add_premium_tier_selection = State()
 
 
 class MailingStates(StatesGroup):

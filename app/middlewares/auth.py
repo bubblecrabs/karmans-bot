@@ -24,22 +24,24 @@ class AuthMiddleware(BaseMiddleware):
             return await handler(event, data)
 
         session: AsyncSession = data["session"]
-        user_repository = UserRepository(session)
+        user_repo = UserRepository(session)
 
-        user: User | None = await user_repository.get_user_by_user_id(user_id=telegram_user.id)
+        user: User | None = await user_repo.get_user_by_user_id(user_id=telegram_user.id)
 
         if user is None:
-            user = await user_repository.create_user(
+            user = await user_repo.create_user(
                 user_id=telegram_user.id,
                 username=telegram_user.username,
                 first_name=telegram_user.first_name,
                 last_name=telegram_user.last_name,
-                is_premium=telegram_user.is_premium,
+                is_telegram_premium=telegram_user.is_premium,
+                is_premium=False,
                 is_superuser=False,
+                is_active=True,
                 is_banned=False,
                 language_code=telegram_user.language_code,
+                premium_until=None,
             )
-            await session.commit()
 
         if user.is_banned:
             return

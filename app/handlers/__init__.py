@@ -7,6 +7,7 @@ from app.handlers.admin import router as admin_router
 from app.handlers.stats import router as stats_router
 from app.handlers.mailing import router as mailing_router
 from app.handlers.moderation import router as moderation_router
+from app.handlers.payments import router as payments_router
 
 
 def get_routers() -> Router:
@@ -18,6 +19,7 @@ def get_routers() -> Router:
     router.include_router(router=stats_router)
     router.include_router(router=mailing_router)
     router.include_router(router=moderation_router)
+    router.include_router(router=payments_router)
     return router
 
 

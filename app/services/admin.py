@@ -1,58 +1,54 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
 from app.repositories.users import UserRepository
+from app.repositories.payments import PaymentRepository
 
 
 class AdminService:
     def __init__(self, session: AsyncSession) -> None:
         self.session: AsyncSession = session
-        self.user_repository: UserRepository = UserRepository(session)
+        self.user_repo: UserRepository = UserRepository(session)
+        self.payment_repo: PaymentRepository = PaymentRepository(session)
 
     async def statistics(self) -> dict:
-        users_count: int = await self.user_repository.count_users()
-        new_users_today: int = await self.user_repository.count_users_joined_today()
-        banned_users_count: int = await self.user_repository.count_banned_users()
-        last_user: User | None = await self.user_repository.get_last_joined_user()
+        user_stats: dict[str, int] = await self.user_repo.get_user_stats()
+        payment_stats: dict[str, int | Decimal] = await self.payment_repo.get_payment_stats()
 
         return {
-            "total_users": users_count,
-            "new_users_today": new_users_today,
-            "banned_users": banned_users_count,
-            "last_user": self._format_user(user=last_user),
-            "joined_at": self._format_datetime(dt=last_user.created_at if last_user else None),
+            **user_stats,
+            **payment_stats,
         }
 
-    @staticmethod
-    def _format_user(user: User | None) -> str:
-        if not user:
-            return "—"
-        return f"@{user.username}" if user.username else f"ID: {user.user_id}"
-
-    @staticmethod
-    def _format_datetime(dt: datetime | None) -> str:
-        if not dt:
-            return "—"
-        return dt.strftime(format="%d.%m.%Y %H:%M")
-
     async def block_user(self, user_id: int) -> bool:
-        user: User | None = await self.user_repository.get_user_by_user_id(user_id=user_id)
+        user: User | None = await self.user_repo.get_user_by_user_id(user_id=user_id)
         if not user:
             return False
 
         user.is_banned = True
-        await self.session.flush()
-        await self.session.commit()
         return True
 
     async def unblock_user(self, user_id: int) -> bool:
-        user: User | None = await self.user_repository.get_user_by_user_id(user_id=user_id)
+        user: User | None = await self.user_repo.get_user_by_user_id(user_id=user_id)
         if not user:
             return False
 
         user.is_banned = False
-        await self.session.flush()
-        await self.session.commit()
+        return True
+
+    async def add_premium(self, user_id: int, days: int) -> bool:
+        user: User | None = await self.user_repo.get_user_by_user_id(user_id=user_id)
+        if not user:
+            return False
+
+        user.is_premium = True
+
+        now: datetime = datetime.now(tz=timezone.utc)
+        if user.premium_until and user.premium_until > now:
+            user.premium_until = user.premium_until + timedelta(days=days)
+        else:
+            user.premium_until = now + timedelta(days=days)
         return True

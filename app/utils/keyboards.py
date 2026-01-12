@@ -8,7 +8,7 @@ from aiogram.utils.keyboard import (
 def start_kb(is_superuser: bool) -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="Button 1", callback_data="button_1"))
-    kb.add(InlineKeyboardButton(text="Button 2", callback_data="button_2"))
+    kb.add(InlineKeyboardButton(text="⭐️ Premium", callback_data="premium"))
 
     if is_superuser:
         kb.add(InlineKeyboardButton(text="🔐 Admin", callback_data="admin"))
@@ -58,8 +58,19 @@ def moderation_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.add(InlineKeyboardButton(text="🚫 Ban", callback_data="ban_user_id"))
     kb.add(InlineKeyboardButton(text="✅ Unban", callback_data="unban_user_id"))
+    kb.add(InlineKeyboardButton(text="⭐️ Add premium", callback_data="add_premium_user_id"))
     kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="admin"))
-    kb.adjust(2)
+    kb.adjust(2, 1, 1)
+    return kb.as_markup()
+
+
+def moderation_premium_tier_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="📦 Basic", callback_data="premium_tier_basic"))
+    kb.add(InlineKeyboardButton(text="⭐ Standard", callback_data="premium_tier_standard"))
+    kb.add(InlineKeyboardButton(text="💎 Pro", callback_data="premium_tier_pro"))
+    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="moderation"))
+    kb.adjust(2, 1, 1)
     return kb.as_markup()
 
 

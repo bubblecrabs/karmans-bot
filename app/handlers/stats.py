@@ -19,11 +19,15 @@ async def stats_callback(call: CallbackQuery, session: AsyncSession) -> None:
 
     stats_message: str = (
         "📊 <b>Statistics:</b>\n\n"
-        f"👥 <b>Number of users:</b> {stats.get('total_users')}\n"
-        f"📈 <b>New users today:</b> {stats.get('new_users_today')}\n"
-        f"🚫 <b>Blocked users:</b> {stats.get('banned_users')}\n\n"
-        f"👤 <b>Last registered:</b> {stats.get('last_user')}\n"
-        f"🕒 <b>Registration time:</b> {stats.get('joined_at')}"
+        f"👥 <b>Number of users:</b> <code>{stats.get('total_users')}</code>\n"
+        f"📈 <b>New users today:</b> <code>{stats.get('new_users_today')}</code>\n"
+        f"👍 <b>Active users:</b> <code>{stats.get('active_users')}</code>\n"
+        f"🚫 <b>Blocked users:</b> <code>{stats.get('banned_users')}</code>\n\n"
+        "💳 <b>Payments:</b>\n\n"
+        f"📦 <b>Total payments:</b> <code>{stats.get('total_payments')}</code>\n"
+        f"🆕 <b>Today payments:</b> <code>{stats.get('payments_today')}</code>\n"
+        f"💰 <b>Total revenue:</b> <code>{stats.get('total_revenue')}</code> $USD\n"
+        f"💵 <b>Today revenue:</b> <code>{stats.get('revenue_today')}</code> $USD"
     )
 
     await call.message.edit_text(

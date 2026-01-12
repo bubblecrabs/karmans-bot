@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 from typing import Any
 
 from aiogram import F, Router
@@ -208,7 +208,7 @@ async def mailing_edit_schedule_callback(call: CallbackQuery, state: FSMContext)
         await call.answer()
         return
 
-    now: datetime = datetime.now(tz=UTC)
+    now: datetime = datetime.now(tz=timezone.utc)
     example_datetime: str = now.strftime(format="%d.%m.%Y %H:%M")
 
     await call.message.edit_text(

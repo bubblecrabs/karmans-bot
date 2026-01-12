@@ -1,7 +1,7 @@
 from collections.abc import AsyncGenerator, Sequence
 from datetime import datetime, date
 
-from sqlalchemy import select, delete, update, func
+from sqlalchemy import select, delete, update, case, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User
@@ -17,20 +17,26 @@ class UserRepository:
         username: str | None,
         first_name: str,
         last_name: str | None,
-        is_premium: bool | None,
+        is_telegram_premium: bool,
+        is_premium: bool,
         is_superuser: bool,
+        is_active: bool,
         is_banned: bool,
         language_code: str | None,
+        premium_until: datetime | None,
     ) -> User:
         user = User(
             user_id=user_id,
             username=username,
             first_name=first_name,
             last_name=last_name,
+            is_telegram_premium=is_telegram_premium,
             is_premium=is_premium,
             is_superuser=is_superuser,
+            is_active=is_active,
             is_banned=is_banned,
             language_code=language_code,
+            premium_until=premium_until,
         )
         self.session.add(instance=user)
         await self.session.flush()
@@ -43,16 +49,22 @@ class UserRepository:
         username: str | None,
         first_name: str,
         last_name: str | None,
-        is_premium: bool | None,
+        is_telegram_premium: bool,
+        is_premium: bool,
+        is_active: bool,
         is_banned: bool,
         language_code: str | None,
+        premium_until: datetime | None,
     ) -> User:
         user.username = username
         user.first_name = first_name
         user.last_name = last_name
+        user.is_telegram_premium = is_telegram_premium
         user.is_premium = is_premium
+        user.is_active = is_active
         user.is_banned = is_banned
         user.language_code = language_code
+        user.premium_until = premium_until
 
         await self.session.flush()
         await self.session.refresh(instance=user)
@@ -61,10 +73,7 @@ class UserRepository:
     async def delete_user(self, user_id: int) -> bool:
         stmt = delete(table=User).where(User.user_id == user_id)
         result = await self.session.execute(statement=stmt)
-        await self.session.flush()
-
-        rowcount = getattr(result, "rowcount", 0)
-        return rowcount > 0
+        return getattr(result, "rowcount", 0) > 0
 
     async def get_user_by_user_id(self, user_id: int) -> User | None:
         stmt = select(User).where(User.user_id == user_id)
@@ -78,27 +87,6 @@ class UserRepository:
         async for user in stream:
             yield user
 
-    async def count_users(self) -> int:
-        stmt = select(func.count(User.user_id))
-        result = await self.session.execute(statement=stmt)
-        return result.scalar_one()
-
-    async def count_users_joined_today(self) -> int:
-        today_start = datetime.combine(date=date.today(), time=datetime.min.time())
-        stmt = select(func.count(User.user_id)).where(User.created_at >= today_start)
-        result = await self.session.execute(statement=stmt)
-        return result.scalar_one()
-
-    async def count_banned_users(self) -> int:
-        stmt = select(func.count(User.user_id)).where(User.is_banned == True)  # noqa: E712
-        result = await self.session.execute(statement=stmt)
-        return result.scalar_one()
-
-    async def get_last_joined_user(self) -> User | None:
-        stmt = select(User).order_by(User.created_at.desc()).limit(limit=1)
-        result = await self.session.execute(statement=stmt)
-        return result.scalar_one_or_none()
-
     async def is_user_banned(self, user_id: int) -> bool:
         stmt = select(User.is_banned).where(User.user_id == user_id)
         result = await self.session.execute(statement=stmt)
@@ -106,7 +94,7 @@ class UserRepository:
         return is_banned if is_banned is not None else False
 
     async def get_active_user_ids(self) -> Sequence[int]:
-        stmt = select(User.user_id).where(User.is_banned == False)  # noqa: E712
+        stmt = select(User.user_id).where(User.is_active == True)  # noqa: E712
         result = await self.session.execute(statement=stmt)
         return result.scalars().all()
 
@@ -119,3 +107,23 @@ class UserRepository:
         )
         result = await self.session.execute(statement=stmt)
         return result.scalars().all()
+
+    async def get_user_stats(self) -> dict[str, int]:
+        today_start: datetime = datetime.combine(date=date.today(), time=datetime.min.time())
+
+        stmt = select(
+            func.count(User.user_id).label("total_users"),
+            func.count(case((User.created_at >= today_start, 1))).label("new_today"),
+            func.count(case((User.is_active == True, 1))).label("active_users"),  # noqa: E712
+            func.count(case((User.is_banned == True, 1))).label("banned_users"),  # noqa: E712
+        )
+
+        result = await self.session.execute(statement=stmt)
+        row = result.one()
+
+        return {
+            "total_users": row.total_users,
+            "new_users_today": row.new_today,
+            "active_users": row.active_users,
+            "banned_users": row.banned_users,
+        }
