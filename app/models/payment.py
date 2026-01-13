@@ -1,33 +1,15 @@
 from datetime import datetime
 from decimal import Decimal
-from enum import Enum as PyEnum
 from typing import TYPE_CHECKING
 
 from sqlalchemy import BigInteger, String, Numeric, DateTime, ForeignKey, Enum, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.utils.enums import PaymentCurrency, PaymentStatus, PaymentProvider
 
 if TYPE_CHECKING:
     from app.models.user import User
-
-
-class PaymentCurrency(str, PyEnum):
-    USD = "USD"
-    XTR = "XTR"
-
-
-class PaymentStatus(str, PyEnum):
-    PENDING = "pending"
-    PAID = "paid"
-    FAILED = "failed"
-    REFUNDED = "refunded"
-    CANCELED = "canceled"
-
-
-class PaymentProvider(str, PyEnum):
-    TELEGRAM_STARS = "telegram_stars"
-    CRYPTO = "crypto"
 
 
 class Payment(Base):

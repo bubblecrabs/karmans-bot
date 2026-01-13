@@ -78,14 +78,12 @@ async def moderation_ban_message(
 
     success: bool = await AdminService(session).block_user(user_id=user_id)
 
-    text: str = (
-        f"✅ <b>User {user_id} has been blocked.</b>"
-        if success
-        else f"❌ <b>User {user_id} not found.</b>"
-    )
-
     await message.answer(
-        text=text,
+        text=(
+            f"✅ <b>User {user_id} has been blocked.</b>"
+            if success
+            else f"❌ <b>User {user_id} not found.</b>"
+        ),
         reply_markup=back_button_kb(callback_data="moderation"),
     )
     await state.clear()
@@ -107,14 +105,12 @@ async def moderation_unban_message(
     user_id = int(message.text)
     success: bool = await AdminService(session).unblock_user(user_id=user_id)
 
-    text: str = (
-        f"✅ <b>User {user_id} has been unblocked.</b>"
-        if success
-        else f"❌ <b>User {user_id} not found.</b>"
-    )
-
     await message.answer(
-        text=text,
+        text=(
+            f"✅ <b>User {user_id} has been unblocked.</b>"
+            if success
+            else f"❌ <b>User {user_id} not found.</b>"
+        ),
         reply_markup=back_button_kb(callback_data="moderation"),
     )
     await state.clear()
@@ -193,14 +189,12 @@ async def moderation_select_premium_tier_callback(
         days=days,
     )
 
-    text: str = (
-        f"✅ <b>User {user_id} received premium subscription.</b>"
-        if success
-        else f"❌ <b>Failed to add premium for user {user_id}.</b>"
-    )
-
     await call.message.edit_text(
-        text=text,
+        text=(
+            f"✅ <b>User {user_id} received premium subscription.</b>"
+            if success
+            else f"❌ <b>Failed to add premium for user {user_id}.</b>"
+        ),
         reply_markup=back_button_kb(callback_data="moderation"),
     )
     await call.answer()

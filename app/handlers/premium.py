@@ -29,7 +29,7 @@ class PremiumTierInfo(TypedDict):
 PREMIUM_PRICES: dict[str, PremiumTierInfo] = {
     "premium_tier_basic": {
         "name": "Basic Premium",
-        "price": 1,
+        "price": 100,
         "duration_days": 3,
     },
     "premium_tier_standard": {
@@ -54,16 +54,14 @@ async def premium_callback(call: CallbackQuery, user: User) -> None:
     is_premium: bool = user.is_premium
     premium_until: datetime | None = user.premium_until
 
-    text: str = (
-        "⭐️ <b>Your premium membership is active!</b>\n\n"
-        "📅 <b>Valid until:</b> "
-        f"<code>{premium_until.strftime(format='%d.%m.%Y %H:%M')}</code>"
-        if is_premium and premium_until
-        else "⭐️ <b>You don't have premium!</b>"
-    )
-
     await call.message.edit_text(
-        text=text,
+        text=(
+            "⭐️ <b>Your premium membership is active!</b>\n\n"
+            "📅 <b>Valid until:</b> "
+            f"<code>{premium_until.strftime(format='%d.%m.%Y %H:%M')}</code>"
+            if is_premium and premium_until
+            else "⭐️ <b>You don't have premium!</b>"
+        ),
         reply_markup=premium_kb(is_premium=is_premium),
     )
     await call.answer()
