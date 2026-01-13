@@ -38,23 +38,32 @@ def url_button_kb(text: str | None, url: str | None) -> InlineKeyboardMarkup | N
 
 def admin_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.add(InlineKeyboardButton(text="👥 Users", callback_data="user_stats"))
-    kb.add(InlineKeyboardButton(text="💵 Payments", callback_data="payment_stats"))
+    kb.add(InlineKeyboardButton(text="👤 Users", callback_data="user_stats"))
+    kb.add(InlineKeyboardButton(text="💳 Payments", callback_data="payment_stats"))
+    kb.add(InlineKeyboardButton(text="📢 Channels", callback_data="channel_stats"))
     kb.add(InlineKeyboardButton(text="📨 Create Mailing", callback_data="create_mailing"))
     kb.add(InlineKeyboardButton(text="📬 Scheduled Mailings", callback_data="manage_mailings"))
-    kb.add(InlineKeyboardButton(text="🔑 Moderation", callback_data="moderation"))
+    kb.add(InlineKeyboardButton(text="⭐️ Add Premium", callback_data="add_premium_user"))
     kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="start"))
     kb.adjust(1)
     return kb.as_markup()
 
 
-def moderation_kb() -> InlineKeyboardMarkup:
+def users_kb() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.add(InlineKeyboardButton(text="🚫 Ban", callback_data="ban_user_id"))
-    kb.add(InlineKeyboardButton(text="✅ Unban", callback_data="unban_user_id"))
-    kb.add(InlineKeyboardButton(text="⭐️ Add Premium", callback_data="add_premium_user_id"))
+    kb.add(InlineKeyboardButton(text="🔒 Block User", callback_data="block_user"))
+    kb.add(InlineKeyboardButton(text="🔓 Unblock User", callback_data="unblock_user"))
     kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="admin"))
-    kb.adjust(2, 1, 1)
+    kb.adjust(2, 1)
+    return kb.as_markup()
+
+
+def channels_kb() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.add(InlineKeyboardButton(text="➕ Add Channel", callback_data="add_channel"))
+    kb.add(InlineKeyboardButton(text="🗑️ Delete Channel", callback_data="delete_channel"))
+    kb.add(InlineKeyboardButton(text="⬅️ Back", callback_data="admin"))
+    kb.adjust(2, 1)
     return kb.as_markup()
 
 

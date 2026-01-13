@@ -46,25 +46,34 @@ class UserRepository:
     async def update_user(
         self,
         user: User,
-        username: str | None,
-        first_name: str,
-        last_name: str | None,
-        is_telegram_premium: bool,
-        is_premium: bool,
-        is_active: bool,
-        is_banned: bool,
-        language_code: str | None,
-        premium_until: datetime | None,
+        username: str | None = None,
+        first_name: str | None = None,
+        last_name: str | None = None,
+        is_telegram_premium: bool | None = None,
+        is_premium: bool | None = None,
+        is_active: bool | None = None,
+        is_banned: bool | None = None,
+        language_code: str | None = None,
+        premium_until: datetime | None = None,
     ) -> User:
-        user.username = username
-        user.first_name = first_name
-        user.last_name = last_name
-        user.is_telegram_premium = is_telegram_premium
-        user.is_premium = is_premium
-        user.is_active = is_active
-        user.is_banned = is_banned
-        user.language_code = language_code
-        user.premium_until = premium_until
+        if username is not None:
+            user.username = username
+        if first_name is not None:
+            user.first_name = first_name
+        if last_name is not None:
+            user.last_name = last_name
+        if is_telegram_premium is not None:
+            user.is_telegram_premium = is_telegram_premium
+        if is_premium is not None:
+            user.is_premium = is_premium
+        if is_active is not None:
+            user.is_active = is_active
+        if is_banned is not None:
+            user.is_banned = is_banned
+        if language_code is not None:
+            user.language_code = language_code
+        if premium_until is not None:
+            user.premium_until = premium_until
 
         await self.session.flush()
         await self.session.refresh(instance=user)
@@ -80,23 +89,35 @@ class UserRepository:
         result = await self.session.execute(statement=stmt)
         return result.scalar_one_or_none()
 
-    async def get_users(self, batch_size: int = 1000) -> AsyncGenerator[User | None]:
-        stmt = select(User).execution_options(yield_per=batch_size, stream_results=True)
+    async def get_all_users(self, batch_size: int = 1000) -> AsyncGenerator[User | None]:
+        stmt = select(User).execution_options(
+            yield_per=batch_size,
+            stream_results=True,
+        )
         stream = await self.session.stream_scalars(statement=stmt)
 
         async for user in stream:
             yield user
 
-    async def is_user_banned(self, user_id: int) -> bool:
-        stmt = select(User.is_banned).where(User.user_id == user_id)
+    async def get_active_users(self) -> Sequence[User]:
+        stmt = select(User).where(User.is_active == True)  # noqa: E712
         result = await self.session.execute(statement=stmt)
-        is_banned: bool | None = result.scalar_one_or_none()
-        return is_banned if is_banned is not None else False
+        return result.scalars().all()
 
     async def get_active_user_ids(self) -> Sequence[int]:
         stmt = select(User.user_id).where(User.is_active == True)  # noqa: E712
         result = await self.session.execute(statement=stmt)
         return result.scalars().all()
+
+    async def set_user_active(self, user_id: int, is_active: bool) -> User | None:
+        stmt = (
+            update(table=User)
+            .where(User.user_id == user_id)
+            .values(is_active=is_active)
+            .returning(User)
+        )
+        result = await self.session.execute(statement=stmt)
+        return result.scalar_one_or_none()
 
     async def set_users_inactive(self, user_ids: list[int]) -> Sequence[int]:
         stmt = (

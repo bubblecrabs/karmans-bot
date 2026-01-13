@@ -15,6 +15,7 @@ class User(Base):
         BigInteger,
         unique=True,
         nullable=False,
+        index=True,
     )
     username: Mapped[str | None] = mapped_column(
         String(length=32),

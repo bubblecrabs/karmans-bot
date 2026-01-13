@@ -12,7 +12,6 @@ from app.repositories.users import UserRepository
 from app.services.admin import AdminService
 from app.utils.keyboards import (
     admin_kb,
-    moderation_kb,
     premium_tier_kb,
     back_button_kb,
 )
@@ -40,35 +39,22 @@ async def admin_callback(call: CallbackQuery) -> None:
     await call.answer()
 
 
-@router.callback_query(F.data == "moderation", AdminFilter())
-async def moderation_callback(call: CallbackQuery) -> None:
-    if not isinstance(call.message, Message):
-        await call.answer()
-        return
-
-    await call.message.edit_text(
-        text="⬇️ <b>What do you want to do?</b>",
-        reply_markup=moderation_kb(),
-    )
-    await call.answer()
-
-
-@router.callback_query(F.data == "ban_user_id", AdminFilter())
-async def moderation_ban_callback(call: CallbackQuery, state: FSMContext) -> None:
+@router.callback_query(F.data == "block_user", AdminFilter())
+async def block_user_callback(call: CallbackQuery, state: FSMContext) -> None:
     if not isinstance(call.message, Message):
         await call.answer()
         return
 
     await call.message.edit_text(
         text="➡️ <b>Enter the Telegram user ID:</b>",
-        reply_markup=back_button_kb(callback_data="moderation"),
+        reply_markup=back_button_kb(callback_data="user_stats"),
     )
-    await state.set_state(state=AdminStates.ban_user_id)
+    await state.set_state(state=AdminStates.block_user)
     await call.answer()
 
 
-@router.message(StateFilter(AdminStates.ban_user_id), AdminFilter())
-async def moderation_ban_message(
+@router.message(StateFilter(AdminStates.block_user), AdminFilter())
+async def block_user_message(
     message: Message,
     state: FSMContext,
     session: AsyncSession,
@@ -94,27 +80,27 @@ async def moderation_ban_message(
             if success
             else f"❌ <b>User {user_id} not found.</b>"
         ),
-        reply_markup=back_button_kb(callback_data="moderation"),
+        reply_markup=back_button_kb(callback_data="user_stats"),
     )
     await state.clear()
 
 
-@router.callback_query(F.data == "unban_user_id", AdminFilter())
-async def moderation_unban_callback(call: CallbackQuery, state: FSMContext) -> None:
+@router.callback_query(F.data == "unblock_user", AdminFilter())
+async def unblock_user_callback(call: CallbackQuery, state: FSMContext) -> None:
     if not isinstance(call.message, Message):
         await call.answer()
         return
 
     await call.message.edit_text(
         text="➡️ <b>Enter the Telegram user ID:</b>",
-        reply_markup=back_button_kb(callback_data="moderation"),
+        reply_markup=back_button_kb(callback_data="user_stats"),
     )
-    await state.set_state(state=AdminStates.unban_user_id)
+    await state.set_state(state=AdminStates.unblock_user)
     await call.answer()
 
 
-@router.message(StateFilter(AdminStates.unban_user_id), AdminFilter())
-async def moderation_unban_message(
+@router.message(StateFilter(AdminStates.unblock_user), AdminFilter())
+async def unblock_user_message(
     message: Message,
     state: FSMContext,
     session: AsyncSession,
@@ -136,27 +122,27 @@ async def moderation_unban_message(
             if success
             else f"❌ <b>User {user_id} not found.</b>"
         ),
-        reply_markup=back_button_kb(callback_data="moderation"),
+        reply_markup=back_button_kb(callback_data="user_stats"),
     )
     await state.clear()
 
 
-@router.callback_query(F.data == "add_premium_user_id", AdminFilter())
-async def moderation_add_premium_callback(call: CallbackQuery, state: FSMContext) -> None:
+@router.callback_query(F.data == "add_premium_user", AdminFilter())
+async def add_premium_callback(call: CallbackQuery, state: FSMContext) -> None:
     if not isinstance(call.message, Message):
         await call.answer()
         return
 
     await call.message.edit_text(
         text="➡️ <b>Enter the Telegram user ID:</b>",
-        reply_markup=back_button_kb(callback_data="moderation"),
+        reply_markup=back_button_kb(callback_data="admin"),
     )
-    await state.set_state(state=AdminStates.add_premium_user_id)
+    await state.set_state(state=AdminStates.add_premium_user)
     await call.answer()
 
 
-@router.message(StateFilter(AdminStates.add_premium_user_id), AdminFilter())
-async def moderation_add_premium_message(
+@router.message(StateFilter(AdminStates.add_premium_user), AdminFilter())
+async def add_premium_message(
     message: Message,
     state: FSMContext,
     session: AsyncSession,
@@ -176,20 +162,20 @@ async def moderation_add_premium_message(
         return
 
     await state.update_data(user_id=user_id)
-    await state.set_state(state=AdminStates.add_premium_tier_selection)
+    await state.set_state(state=AdminStates.add_premium_tier)
 
     await message.answer(
         text="📋 <b>Select a premium subscription type:</b>",
-        reply_markup=premium_tier_kb(callback_back="moderation"),
+        reply_markup=premium_tier_kb(callback_back="admin"),
     )
 
 
 @router.callback_query(
     F.data.startswith("premium_tier_"),
-    StateFilter(AdminStates.add_premium_tier_selection),
+    StateFilter(AdminStates.add_premium_tier),
     AdminFilter(),
 )
-async def moderation_select_premium_tier_callback(
+async def add_premium_tier_callback(
     call: CallbackQuery,
     state: FSMContext,
     session: AsyncSession,
@@ -216,7 +202,7 @@ async def moderation_select_premium_tier_callback(
             if success
             else f"❌ <b>Failed to add premium for user {user_id}.</b>"
         ),
-        reply_markup=back_button_kb(callback_data="moderation"),
+        reply_markup=back_button_kb(callback_data="admin"),
     )
     await call.answer()
     await state.clear()

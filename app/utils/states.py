@@ -2,10 +2,10 @@ from aiogram.fsm.state import State, StatesGroup
 
 
 class AdminStates(StatesGroup):
-    ban_user_id: State = State()
-    unban_user_id: State = State()
-    add_premium_user_id: State = State()
-    add_premium_tier_selection = State()
+    block_user: State = State()
+    unblock_user: State = State()
+    add_premium_user: State = State()
+    add_premium_tier: State = State()
 
 
 class MailingStates(StatesGroup):

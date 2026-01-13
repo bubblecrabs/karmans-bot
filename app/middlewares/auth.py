@@ -44,5 +44,23 @@ class AuthMiddleware(BaseMiddleware):
         if user.is_banned:
             return
 
+        needs_update = False
+        update_fields = {}
+
+        if not user.is_active:
+            update_fields["is_active"] = True
+            needs_update = True
+
+        if user.username != telegram_user.username:
+            update_fields["username"] = telegram_user.username
+            needs_update = True
+
+        if user.is_telegram_premium != telegram_user.is_premium:
+            update_fields["is_telegram_premium"] = telegram_user.is_premium
+            needs_update = True
+
+        if needs_update:
+            user = await user_repo.update_user(user=user, **update_fields)
+
         data["user"] = user
         return await handler(event, data)
