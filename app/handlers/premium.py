@@ -133,7 +133,6 @@ async def pre_checkout_query_handler(pre_checkout_query: PreCheckoutQuery) -> No
 @router.message(F.successful_payment)
 async def successful_payment_handler(message: Message, session: AsyncSession) -> None:
     payment: SuccessfulPayment | None = message.successful_payment
-
     if not payment:
         return
 
@@ -152,7 +151,6 @@ async def successful_payment_handler(message: Message, session: AsyncSession) ->
     tier_info: PremiumTierInfo = PREMIUM_PRICES[tier_type]
 
     payment_service = PaymentService(session=session)
-
     success: bool = await payment_service.process_successful_payment(
         user_id=user_id,
         charge_id=payment.telegram_payment_charge_id,
@@ -161,7 +159,6 @@ async def successful_payment_handler(message: Message, session: AsyncSession) ->
         duration_days=tier_info["duration_days"],
         description=f"{tier_info['name']} subscription",
     )
-
     if not success:
         await message.answer(text="❌ <b>Error processing payment.</b>")
         return

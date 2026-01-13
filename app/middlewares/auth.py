@@ -19,7 +19,6 @@ class AuthMiddleware(BaseMiddleware):
         data: dict[str, Any],
     ) -> Any:
         telegram_user: TelegramUser | None = data.get("event_from_user")
-
         if not telegram_user:
             return await handler(event, data)
 
@@ -27,7 +26,6 @@ class AuthMiddleware(BaseMiddleware):
         user_repo = UserRepository(session)
 
         user: User | None = await user_repo.get_user_by_user_id(user_id=telegram_user.id)
-
         if user is None:
             user = await user_repo.create_user(
                 user_id=telegram_user.id,
@@ -47,5 +45,4 @@ class AuthMiddleware(BaseMiddleware):
             return
 
         data["user"] = user
-
         return await handler(event, data)

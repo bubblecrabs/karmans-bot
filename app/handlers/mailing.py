@@ -342,8 +342,6 @@ async def mailing_start_callback(call: CallbackQuery, state: FSMContext) -> None
         await call.answer(text="❌ Message text is required!", show_alert=True)
         return
 
-    mailing_service = MailingService(bot=bot)
-
     image: str | None = mailing_data.get("image")
     button_text: str | None = mailing_data.get("button_text")
     button_url: str | None = mailing_data.get("button_url")
@@ -365,6 +363,8 @@ async def mailing_start_callback(call: CallbackQuery, state: FSMContext) -> None
         button_url=button_url,
         scheduled_time=scheduled_time,
     )
+
+    mailing_service = MailingService(bot=bot)
 
     try:
         if scheduled_time is not None:

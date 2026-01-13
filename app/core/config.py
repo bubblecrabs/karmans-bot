@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     BOT_TOKEN: str = "changethis"
     DEBUG: bool = False
     DEFAULT_LANGUAGE: str = "en"
+    CHANNEL_IDS: set[int] | None = None
 
     # Postgres settings
     POSTGRES_USER: str = "postgres"

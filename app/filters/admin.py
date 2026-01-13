@@ -11,9 +11,8 @@ class AdminFilter(BaseFilter):
         if not message.from_user:
             return False
 
-        repository = UserRepository(session=session)
-
-        user: User | None = await repository.get_user_by_user_id(user_id=message.from_user.id)
+        user_repo = UserRepository(session=session)
+        user: User | None = await user_repo.get_user_by_user_id(user_id=message.from_user.id)
         if not user:
             return False
 
