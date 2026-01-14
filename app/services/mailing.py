@@ -43,10 +43,11 @@ class MailingService:
         button_text: str | None = message_data.get("button_text")
         button_url: str | None = message_data.get("button_url")
 
-        reply_markup: InlineKeyboardMarkup | None = url_button_kb(
-            text=button_text,
-            url=button_url,
-        )
+        if button_text and button_url:
+            reply_markup: InlineKeyboardMarkup = url_button_kb(
+                text=button_text,
+                url=button_url,
+            )
 
         success_count = 0
         failed_count = 0

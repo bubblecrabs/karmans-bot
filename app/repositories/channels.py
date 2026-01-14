@@ -15,8 +15,9 @@ class ChannelRepository:
         channel_id: int,
         username: str | None,
         title: str,
-        description: str,
+        description: str | None,
         is_active: bool = True,
+        invite_link: str | None = None,
     ) -> Channel:
         channel = Channel(
             channel_id=channel_id,
@@ -24,6 +25,7 @@ class ChannelRepository:
             title=title,
             description=description,
             is_active=is_active,
+            invite_link=invite_link,
         )
         self.session.add(instance=channel)
         await self.session.flush()
@@ -37,6 +39,7 @@ class ChannelRepository:
         title: str | None = None,
         description: str | None = None,
         is_active: bool | None = None,
+        invite_link: str | None = None,
     ) -> Channel:
         if username is not None:
             channel.username = username
@@ -46,6 +49,8 @@ class ChannelRepository:
             channel.description = description
         if is_active is not None:
             channel.is_active = is_active
+        if invite_link is not None:
+            channel.invite_link = invite_link
 
         await self.session.flush()
         await self.session.refresh(instance=channel)

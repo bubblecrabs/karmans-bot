@@ -274,10 +274,11 @@ async def mailing_preview_callback(call: CallbackQuery, state: FSMContext) -> No
         await call.answer(text="❌ Message text is required!", show_alert=True)
         return
 
-    reply_markup: InlineKeyboardMarkup | None = url_button_kb(
-        text=button_text,
-        url=button_url,
-    )
+    if button_text and button_url:
+        reply_markup: InlineKeyboardMarkup = url_button_kb(
+            text=button_text,
+            url=button_url,
+        )
 
     schedule_info = ""
     if schedule:

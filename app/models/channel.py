@@ -23,15 +23,20 @@ class Channel(Base):
         unique=False,
         nullable=False,
     )
-    description: Mapped[str] = mapped_column(
+    description: Mapped[str | None] = mapped_column(
         String(length=255),
         unique=False,
-        nullable=False,
+        nullable=True,
     )
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
         nullable=False,
+    )
+    invite_link: Mapped[str | None] = mapped_column(
+        String(length=255),
+        unique=True,
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

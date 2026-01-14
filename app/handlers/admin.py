@@ -1,20 +1,18 @@
 from typing import Any
 
-from aiogram import F, Router
+from aiogram import F, Router, Bot
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, Chat, MessageOriginChannel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.filters.admin import AdminFilter
+from app.models.channel import Channel
 from app.models.user import User
+from app.repositories.channels import ChannelRepository
 from app.repositories.users import UserRepository
 from app.services.admin import AdminService
-from app.utils.keyboards import (
-    admin_kb,
-    premium_tier_kb,
-    back_button_kb,
-)
+from app.utils.keyboards import admin_kb, premium_tier_kb, back_button_kb
 from app.utils.states import AdminStates
 
 router = Router()
@@ -205,4 +203,94 @@ async def add_premium_tier_callback(
         reply_markup=back_button_kb(callback_data="admin"),
     )
     await call.answer()
+    await state.clear()
+
+
+@router.callback_query(F.data == "add_channel", AdminFilter())
+async def add_channel_callback(call: CallbackQuery, state: FSMContext) -> None:
+    if not isinstance(call.message, Message):
+        await call.answer()
+        return
+
+    await call.message.edit_text(
+        text="➡️ <b>Forward any message from the channel:</b>",
+        reply_markup=back_button_kb(callback_data="channel_stats"),
+    )
+    await state.set_state(state=AdminStates.add_channel)
+    await call.answer()
+
+
+@router.message(StateFilter(AdminStates.add_channel), AdminFilter())
+async def add_channel_message(
+    message: Message,
+    state: FSMContext,
+    session: AsyncSession,
+    bot: Bot,
+) -> None:
+    if not message.from_user:
+        return
+
+    if not message.forward_origin:
+        await message.answer(text="❌ <b>This is not a forwarded message.</b>")
+        return
+
+    if not isinstance(message.forward_origin, MessageOriginChannel):
+        await message.answer(text="❌ <b>The message must be forwarded from the channel.</b>")
+        return
+
+    channel: Chat = message.forward_origin.chat
+    channel_id: int = channel.id
+    channel_title: str = channel.title or "Untitled"
+    channel_username: str | None = channel.username
+    channel_description: str | None = channel.description
+
+    channel_repo = ChannelRepository(session)
+    existing: Channel | None = await channel_repo.get_channel_by_channel_id(channel_id=channel_id)
+
+    if not channel_username:
+        try:
+            invite_link: str = await bot.export_chat_invite_link(chat_id=channel_id)
+        except Exception:
+            await message.answer(
+                text=(
+                    "❌ <b>Unable to create invite link.</b>\n\n"
+                    "⚠️ <b>Verify that the bot is the channel administrator.</b>"
+                )
+            )
+            return
+
+    if existing:
+        await message.answer(
+            text=(
+                f"❌ <b>Channel already added:</b>\n\n"
+                f"📌 <b>Title:</b> {existing.title}\n"
+                f"🆔 <b>ID:</b> <code>{existing.channel_id}</code>\n"
+                f"👤 <b>Username:</b> {f'@{existing.username}' if existing.username else 'Private'}\n"
+                f"✅ <b>Active:</b> {'Yes' if existing.is_active else 'No'}"
+            ),
+            reply_markup=back_button_kb(callback_data="channel_stats"),
+        )
+        await state.clear()
+        return
+
+    new_channel: Channel = await channel_repo.create_channel(
+        channel_id=channel_id,
+        username=channel_username,
+        title=channel_title,
+        description=channel_description,
+        is_active=True,
+        invite_link=invite_link,
+    )
+
+    await message.answer(
+        text=(
+            f"✅ <b>Channel successfully added!</b>\n\n"
+            f"📌 <b>Title:</b> {new_channel.title}\n"
+            f"🆔 <b>ID:</b> <code>{new_channel.channel_id}</code>\n"
+            f"👤 <b>Username:</b> {f'@{new_channel.username}' if new_channel.username else 'Private'}\n\n"
+            f"⚠️ <b>Important:</b> Add the bot as an administrator to the channel, "
+            f"otherwise the subscription check will not work!"
+        ),
+        reply_markup=back_button_kb(callback_data="channel_stats"),
+    )
     await state.clear()

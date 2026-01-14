@@ -6,6 +6,7 @@ class AdminStates(StatesGroup):
     unblock_user: State = State()
     add_premium_user: State = State()
     add_premium_tier: State = State()
+    add_channel: State = State()
 
 
 class MailingStates(StatesGroup):
